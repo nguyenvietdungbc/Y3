@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Y3 — Sáng kiến Thanh toán & Quản lý Dòng tiền | VietinBank</title>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <style>
@@ -58,8 +57,8 @@
       position: absolute; border-radius: 50%;
       pointer-events: none; animation: float 8s ease-in-out infinite;
     }
-    .hero-shape-1 { width: 280px; height: 280px; top: -80px; right: -60px; background: rgba(215,18,73,0.12); animation-delay: 0s; }
-    .hero-shape-2 { width: 180px; height: 180px; bottom: -50px; left: -40px; background: rgba(126,211,247,0.1); animation-delay: 2s; }
+    .hero-shape-1 { width: 280px; height: 280px; top: -80px; right: -60px; background: rgba(215,18,73,0.07); animation-delay: 0s; }
+    .hero-shape-2 { width: 180px; height: 180px; bottom: -50px; left: -40px; background: rgba(126,211,247,0.06); animation-delay: 2s; }
     .hero-shape-3 { width: 120px; height: 120px; top: 30%; right: 15%; background: rgba(244,168,54,0.1); animation-delay: 4s; }
     @keyframes float {
       0%,100% { transform: translateY(0) rotate(0deg); }
@@ -422,7 +421,7 @@
     .hero h1 .accent { color: var(--gold); }
     .hero-desc {
       font-size: 1.05rem;
-      color: rgba(255,255,255,0.75);
+      color: rgba(255,255,255,0.8);
       max-width: 620px;
       margin-bottom: 36px;
       font-weight: 400;
@@ -1352,7 +1351,7 @@
   --gradient-red: linear-gradient(135deg,#D71249,#ff3d6b);
   --gradient-blue: linear-gradient(135deg,#005993,#007DB7);
   --gradient-gold: linear-gradient(135deg,#F4A836,#ffd166);
-  --gradient-hero: linear-gradient(-45deg,#003f6b,#005993,#0072aa,#004a7c);
+  --gradient-hero: linear-gradient(-45deg,#1a3a52,#1e4976,#2a5f8f,#1d3f62);
   --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,89,147,0.08);
   --shadow-hover: 0 8px 32px rgba(0,89,147,0.18), 0 2px 8px rgba(0,0,0,0.06);
   --shadow-glow-red: 0 0 0 4px rgba(215,18,73,0.12);
@@ -2406,7 +2405,6 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
   <canvas id="gateCanvas"></canvas>
   <div class="gate-box">
     <div class="gate-logo">Y3</div>
-    <div class="gate-title">Sáng kiến Y3 · VietinBank</div>
     <div class="gate-sub">Tài liệu nội bộ — Vui lòng nhập mật khẩu để tiếp tục</div>
     <div class="gate-input-wrap">
       <i class="fas fa-lock"></i>
@@ -2435,7 +2433,6 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
     <div class="logo" style="text-decoration:none;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="showPanel('home')">
       <div class="logo-icon">Y3</div>
       <div class="logo-text">
-        <strong>Sáng kiến Y3</strong>
         <span>Thanh toán & Quản lý Dòng tiền</span>
       </div>
     </div>
@@ -2508,12 +2505,11 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
     <div class="panel active" id="panel-home">
 <!-- HERO -->
 <section class="hero">
-  <canvas id="heroCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0.4"></canvas>
+  <canvas id="heroCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0.2"></canvas>
   <div class="hero-shape hero-shape-1"></div>
   <div class="hero-shape hero-shape-2"></div>
   <div class="hero-shape hero-shape-3"></div>
   <div class="hero-inner">
-    <h1 id="heroTitle">Sáng kiến <span class="accent">Y3</span><br/>Bộ Giải pháp Thanh toán &<br/>Quản lý Dòng tiền</h1>
     <p class="hero-desc" id="heroDesc">Tài liệu hướng dẫn dành cho RM Chi nhánh — Nắm vững bộ sản phẩm, tiếp cận đúng phân khúc khách hàng, đẩy mạnh doanh số thanh toán và quản lý dòng tiền theo định hướng Trụ sở chính.</p>
     <div class="hero-stats">
       <div class="hero-stat">
@@ -2568,6 +2564,16 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
           <div class="card-icon purple"><i class="fas fa-circle-question"></i></div>
           <h3>FAQ</h3>
           <p>Giải đáp các vướng mắc thường gặp khi triển khai Y3.</p>
+        </div>
+        <div class="card" style="cursor:pointer;border:1.5px solid rgba(0,89,147,0.18);background:linear-gradient(135deg,#f0f7ff,#e6f4fb)" onclick="showPanel('dashboard')">
+          <div class="card-icon" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-mid));color:white;box-shadow:0 4px 14px rgba(0,89,147,0.3)">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3 style="color:var(--blue-dark)">Dashboard API</h3>
+          <p>Theo dõi tiến độ triển khai, KPI kết nối API, trạng thái golive theo khu vực và chi nhánh.</p>
+          <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:var(--blue-mid)">
+            <i class="fas fa-arrow-right"></i> Xem Dashboard
+          </div>
         </div>
       </div>
     </div>
@@ -5010,7 +5016,7 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
     <div class="section-num">5</div>
     <div class="section-title">
       <h2>Khó khăn vướng mắc thường gặp</h2>
-      <p>Các câu hỏi phổ biến nhất của RM khi triển khai sáng kiến Y3</p>
+      <p>Các câu hỏi phổ biến nhất của RM khi triển khai Y3</p>
     </div>
   </div>
 
@@ -5425,7 +5431,7 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
 </div><!-- end app-layout -->
 
 <footer>
-  <strong>VietinBank — Sáng kiến Y3</strong>
+  <strong>VietinBank · Y3 — Thanh toán & Quản lý Dòng tiền</strong>
   <p>Tài liệu nội bộ dành cho RM Chi nhánh. Không phát tán ra ngoài hệ thống. &copy; 2025 Ngân hàng TMCP Công Thương Việt Nam.</p>
   <p style="margin-top:8px;font-size:0.75rem;opacity:0.6">Cập nhật lần cuối: 28/04/2025 &nbsp;|&nbsp; Phiên bản 1.0 — Ban KHDN VVN</p>
 </footer>
@@ -5739,7 +5745,7 @@ document.querySelectorAll('.card,.customer-card,.faq-item,.contact-card').forEac
 
 // ── CHATBOT ─────────────────────────────────────────────────────────────────
 const KB = [
-  {k:['y3','sáng kiến','tổng quan','mục tiêu','y3 là gì'],a:`<strong>Sáng kiến Y3</strong> là chương trình chiến lược của VietinBank:<br><ul><li>Tăng giao dịch <strong>không tiền mặt</strong>, nâng CASA</li><li>Deepening quan hệ DN qua bộ giải pháp tích hợp</li><li>5 trụ cột: <strong>Thu hộ · Chi hộ · CMS · Thanh toán bán lẻ · Kết nối ERP</strong></li></ul>`},
+  {k:['y3','sáng kiến','tổng quan','mục tiêu','y3 là gì'],a:`<strong>Y3 — Thanh toán & Quản lý Dòng tiền</strong> là chương trình chiến lược của VietinBank:<br><ul><li>Tăng giao dịch <strong>không tiền mặt</strong>, nâng CASA</li><li>Deepening quan hệ DN qua bộ giải pháp tích hợp</li><li>5 trụ cột: <strong>Thu hộ · Chi hộ · CMS · Thanh toán bán lẻ · Kết nối ERP</strong></li></ul>`},
   {k:['thu hộ','collection','thu tiền','thu viện phí','thu học phí','cod'],a:`<strong>Giải pháp Thu hộ:</strong><br><ul><li>Thu tiền đa kênh: QR, chuyển khoản định danh, POS</li><li>Đối soát tự động ngay khi nhận tiền</li><li>Phân bổ về TK tập trung tức thì</li><li>Báo cáo theo đại lý/điểm theo thời gian thực</li></ul>Phù hợp: <strong>Bệnh viện, Trường học, FMCG, Logistics</strong>`},
   {k:['chi hộ','disbursement','thanh toán lương','bulk','chi trả'],a:`<strong>Giải pháp Chi hộ:</strong><br><ul><li>Thanh toán batch 10.000+ thụ hưởng cùng lúc</li><li>Lên lịch tự động theo ngày cố định</li><li>Phê duyệt 4-mắt, kiểm soát hạn mức</li><li>Kết nối HRMS, ERP, phần mềm kế toán</li></ul>`},
   {k:['cms','cash management','quản lý dòng tiền','sweeping','pooling','notional','zero balancing'],a:`<strong>Cash Management System (CMS):</strong><br><ul><li><strong>Zero/Target Balancing</strong>: Gom số dư về TK tập trung</li><li><strong>Notional Pooling</strong>: Bù trừ số dư tối ưu lãi vay</li><li>Dashboard dòng tiền toàn tập đoàn thời gian thực</li><li>Dự báo thanh khoản, cảnh báo sớm</li></ul>`},
@@ -5932,7 +5938,7 @@ document.querySelectorAll('.card[onclick]').forEach(addTilt);
 (function() {
   const badge = document.querySelector('.hero-badge span');
   if (!badge) return;
-  const texts = ['Sáng kiến chiến lược Y3', 'Thanh toán số VietinBank', 'Quản lý Dòng tiền hiện đại'];
+  const texts = ['Y3 — Thanh toán & Quản lý Dòng tiền', 'Giải pháp Thu hộ · Chi hộ · CMS', 'Kết nối ERP · VietQR · POS'];
   let i = 0, j = 0, deleting = false;
   function type() {
     const txt = texts[i];
