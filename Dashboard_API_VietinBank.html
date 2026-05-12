@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard Kết Nối API – VietinBank 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#D71249;--red2:#E21D50;--red-bg:rgba(215,18,73,.08);--red-glow:rgba(215,18,73,.25);
+  --blue:#005993;--blue2:#007DB7;--blue3:#0091D4;--blue-dk:#003A6B;--blue-bg:#EBF5FB;
+  --sky:#7ED3F7;--sky2:#B3E5FC;
+  --green:#10B981;--green2:#34D399;--green-bg:#ECFDF5;
+  --gold:#F59E0B;--gold2:#FCD34D;
+  --purple:#7C3AED;--purple2:#A78BFA;
+  --bg:#F0F5FB;--card:#FFFFFF;--dark:#002D5A;
+  --g1:#1E3A5F;--g2:#334155;--g3:#64748B;--g4:#94A3B8;--g5:#CBD5E1;--g6:#E2E8F0;--g7:#F8FAFC;
+  --font:'Inter',system-ui,sans-serif;--r:10px;
+  --sh1:0 1px 3px rgba(0,45,90,.06),0 1px 2px rgba(0,45,90,.04);
+  --sh2:0 4px 16px rgba(0,45,90,.1),0 2px 6px rgba(0,45,90,.06);
+  --sh3:0 10px 36px rgba(0,45,90,.14),0 4px 12px rgba(0,45,90,.08);
+}
+body{background:var(--bg);font-family:var(--font);color:var(--dark);font-size:13px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sky);border-radius:10px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{0%{opacity:0;transform:translateY(18px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{0%{opacity:0;transform:scale(.92)}100%{opacity:1;transform:scale(1)}}
+@keyframes slideRight{0%{width:0}100%{width:var(--w,100%)}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes pulseRed{0%,100%{box-shadow:0 0 0 0 var(--red-glow)}60%{box-shadow:0 0 0 10px transparent}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes glow{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.au{animation:fadeUp .45s ease both}
+.au1{animation:fadeUp .45s .08s ease both}
+.au2{animation:fadeUp .45s .16s ease both}
+.au3{animation:fadeUp .45s .24s ease both}
+.au4{animation:fadeUp .45s .32s ease both}
+.au5{animation:fadeUp .45s .40s ease both}
+
+/* HEADER */
+.hdr{background:linear-gradient(120deg,#001D3D 0%,var(--blue-dk) 40%,var(--blue) 75%,var(--blue2) 100%);color:#fff;border-bottom:4px solid var(--red);position:relative;overflow:hidden}
+.hdr-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;position:relative;z-index:2}
+.hdr-deco{position:absolute;top:0;left:0;right:0;bottom:0;z-index:1;pointer-events:none;overflow:hidden}
+.hdr-circle{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(126,211,247,.15) 0%,transparent 70%)}
+.hdr-circle.c1{width:500px;height:500px;top:-200px;right:-80px}
+.hdr-circle.c2{width:300px;height:300px;bottom:-180px;left:10%}
+.hdr-circle.c3{width:200px;height:200px;top:-60px;left:40%;background:radial-gradient(circle,rgba(215,18,73,.08) 0%,transparent 70%)}
+.logo-wrap{display:flex;align-items:center;gap:14px}
+.logo{background:var(--red);color:#fff;font-weight:900;font-size:13px;padding:7px 14px;border-radius:7px;letter-spacing:.8px;box-shadow:0 3px 14px rgba(215,18,73,.45);border:1px solid rgba(255,255,255,.25);white-space:nowrap}
+.hdr-text h1{font-size:17px;font-weight:800;letter-spacing:.2px;line-height:1.3}
+.hdr-text p{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+.hdr-right{display:flex;gap:10px;align-items:center}
+.date-badge{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:500}
+.data-mode-btn{background:rgba(126,211,247,.15);border:1px solid rgba(126,211,247,.35);color:var(--sky);padding:5px 12px;border-radius:20px;font-size:11px;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.data-mode-btn:hover{background:rgba(126,211,247,.25);border-color:var(--sky);color:#fff}
+
+/* IMPORT */
+.import-zone{background:linear-gradient(135deg,#001020,#001D3D);border-bottom:1px solid rgba(126,211,247,.15)}
+.import-bar{display:flex;align-items:center;gap:12px;padding:9px 28px;flex-wrap:wrap}
+.import-lbl{color:var(--sky);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.drop-box{border:1.5px dashed rgba(126,211,247,.35);border-radius:7px;padding:7px 18px;color:rgba(255,255,255,.55);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.drop-box:hover,.drop-box.dragover{border-color:var(--sky);background:rgba(126,211,247,.1);color:#fff;transform:scale(1.01)}
+#file-input{display:none}
+.imp-status{font-size:11px;font-weight:600}
+.imp-status.ok{color:#6EE7B7}.imp-status.err{color:#FCA5A5}
+.btn-sample{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.45);padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .2s}
+.btn-sample:hover{border-color:var(--sky);color:var(--sky)}
+
+/* MAPPER */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:9999;justify-content:center;align-items:center}
+.overlay.show{display:flex;animation:scaleIn .2s ease}
+.mbox{background:#fff;border-radius:16px;padding:28px;max-width:700px;width:95%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.3);border-top:4px solid var(--blue)}
+.mbox h2{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px}
+.mbox .sub{font-size:12px;color:var(--g3);margin-bottom:18px}
+.msheet{display:flex;gap:10px;align-items:center;background:var(--g7);padding:10px 14px;border-radius:8px;margin-bottom:14px;flex-wrap:wrap}
+.msheet label{font-size:12px;font-weight:600;color:var(--g2)}
+.msheet select,.mrow select{border:1.5px solid var(--g6);border-radius:6px;padding:6px 10px;font-size:12px;outline:none;font-family:var(--font);transition:border-color .2s}
+.msheet select:focus,.mrow select:focus{border-color:var(--blue)}
+.mprev{background:var(--g7);border-radius:6px;padding:10px;font-size:11px;color:var(--g3);margin-bottom:14px;max-height:56px;overflow:auto;font-family:monospace;line-height:1.7}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.mrow label{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.mrow select{width:100%}
+.macts{display:flex;gap:10px;justify-content:flex-end}
+.btn-ok{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;box-shadow:0 4px 14px rgba(0,89,147,.3)}
+.btn-ok:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,89,147,.4)}
+.btn-cancel{background:var(--g7);color:var(--g3);border:1.5px solid var(--g6);padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--font)}
+
+/* INFO STRIP */
+.strip{background:var(--blue-bg);border-bottom:1px solid var(--g6);padding:5px 28px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--blue);font-weight:500}
+
+/* FILTERS */
+.fbar{background:#fff;border-bottom:1px solid var(--g6);padding:10px 28px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;box-shadow:var(--sh1)}
+.fg{display:flex;align-items:center;gap:6px}
+.fg label{color:var(--blue);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;white-space:nowrap}
+.fg select{background:#fff;color:var(--dark);border:1.5px solid var(--g6);border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;outline:none;font-family:var(--font);transition:border-color .2s;min-width:110px}
+.fg select:hover,.fg select:focus{border-color:var(--blue)}
+.btn-reset{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;border:none;padding:6px 16px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);transition:all .2s}
+.btn-reset:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--red-glow)}
+
+/* MAIN */
+.main{padding:18px 28px}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
+.kcard{background:#fff;border-radius:var(--r);padding:16px 16px 14px;box-shadow:var(--sh1);position:relative;overflow:hidden;transition:all .25s;cursor:default}
+.kcard:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.kcard-bar{position:absolute;top:0;left:0;right:0;height:3.5px;border-radius:var(--r) var(--r) 0 0}
+.kcard.blue .kcard-bar{background:linear-gradient(90deg,var(--blue),var(--blue2))}
+.kcard.red .kcard-bar{background:linear-gradient(90deg,var(--red),var(--red2))}
+.kcard.green .kcard-bar{background:linear-gradient(90deg,var(--green),var(--green2))}
+.kcard.gold .kcard-bar{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.kcard.sky .kcard-bar{background:linear-gradient(90deg,var(--sky),var(--sky2))}
+.kcard.purple .kcard-bar{background:linear-gradient(90deg,var(--purple),var(--purple2))}
+.kcard-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px;flex-shrink:0}
+.kcard.blue .kcard-icon{background:var(--blue-bg)}
+.kcard.red .kcard-icon{background:var(--red-bg)}
+.kcard.green .kcard-icon{background:var(--green-bg)}
+.kcard.gold .kcard-icon{background:rgba(245,158,11,.1)}
+.kcard.sky .kcard-icon{background:rgba(126,211,247,.15)}
+.kcard.purple .kcard-icon{background:rgba(124,58,237,.1)}
+.kcard-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--g3);margin-bottom:4px}
+.kcard-val{font-size:28px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.kcard.blue .kcard-val{color:var(--blue)}
+.kcard.red .kcard-val{color:var(--red)}
+.kcard.green .kcard-val{color:var(--green)}
+.kcard.gold .kcard-val{color:var(--gold)}
+.kcard.sky .kcard-val{color:var(--blue2)}
+.kcard.purple .kcard-val{color:var(--purple)}
+.kcard-sub{font-size:10.5px;color:var(--g4);margin-top:4px;font-weight:500}
+.kcard-trend{position:absolute;bottom:10px;right:12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px}
+.trend-up{color:var(--green)}.trend-dn{color:var(--red)}
+
+/* ALERT */
+.alert{background:linear-gradient(135deg,#7F1D1D,var(--red));color:#fff;border-radius:var(--r);padding:11px 20px;display:flex;align-items:center;gap:14px;margin-bottom:16px;box-shadow:0 4px 20px var(--red-glow);animation:pulseRed 2.5s infinite}
+.alert-icon{font-size:22px;animation:float 2s ease infinite}
+.alert-body strong{font-size:14px;font-weight:800;display:block}
+.alert-body span{font-size:12px;opacity:.85}
+.alert-chips{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.achip{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* PIPELINE */
+.pipe-wrap{background:#fff;border-radius:var(--r);padding:16px 18px;margin-bottom:16px;box-shadow:var(--sh1)}
+.pipe-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.pipe-ttl{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--g3);letter-spacing:.6px}
+.pipe-ttl span{color:var(--red)}
+.pipe-legend{display:flex;gap:16px;font-size:11px;color:var(--g3)}
+.pipe-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.pipe-stages{display:flex;gap:6px;align-items:stretch}
+.pstage{flex:1;min-width:0;border-radius:8px;padding:10px 8px 8px;cursor:pointer;transition:all .2s;text-align:center;position:relative;border:1.5px solid transparent}
+.pstage:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.pstage.active{transform:translateY(-2px)}
+.pstage .psname{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pstage .psnum{font-size:22px;font-weight:900;line-height:1}
+.pstage .pspct{font-size:10px;margin-top:3px;opacity:.7}
+/* Stage colors */
+.pstage.tkgp{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3)}.pstage.tkgp .psname{color:var(--gold)}.pstage.tkgp .psnum{color:var(--gold)}
+.pstage.ba{background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.25)}.pstage.ba .psname{color:var(--purple)}.pstage.ba .psnum{color:var(--purple)}
+.pstage.dev{background:var(--blue-bg);border-color:rgba(0,89,147,.25)}.pstage.dev .psname{color:var(--blue)}.pstage.dev .psnum{color:var(--blue)}
+.pstage.uat{background:rgba(0,145,212,.08);border-color:rgba(0,145,212,.25)}.pstage.uat .psname{color:var(--blue3)}.pstage.uat .psnum{color:var(--blue3)}
+.pstage.accept{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)}.pstage.accept .psname{color:var(--green)}.pstage.accept .psnum{color:var(--green)}
+.pstage.glv{background:linear-gradient(135deg,rgba(215,18,73,.1),rgba(226,29,80,.05));border-color:rgba(215,18,73,.35);animation:pulseRed 2.5s infinite}.pstage.glv .psname{color:var(--red)}.pstage.glv .psnum{color:var(--red)}
+/* Arrow connector */
+.pipe-arr{color:var(--g5);font-size:18px;line-height:1;display:flex;align-items:center;flex-shrink:0}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:2px solid var(--g6);overflow-x:auto}
+.tab{padding:9px 18px;cursor:pointer;font-size:13px;font-weight:600;color:var(--g4);border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab:hover{color:var(--blue)}
+.tbadge{font-size:10px;font-weight:800;padding:1px 7px;border-radius:10px;min-width:22px;text-align:center}
+.tbadge.red{background:var(--red-bg);color:var(--red)}
+.tbadge.green{background:var(--green-bg);color:var(--green)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeUp .3s ease}
+
+/* CHART CARDS */
+.crows{display:grid;gap:12px;margin-bottom:12px}
+.crows.c2{grid-template-columns:1fr 1fr}
+.crows.c3{grid-template-columns:2fr 1fr 1fr}
+.crows.c13{grid-template-columns:1.4fr 1fr 1fr}
+.crows.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.cc{background:#fff;border-radius:var(--r);padding:18px;box-shadow:var(--sh1);transition:box-shadow .2s}
+.cc:hover{box-shadow:var(--sh2)}
+.cc-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--g7)}
+.cc-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g2)}
+.cc-ttl .hi{color:var(--red)}
+.cc-badge{background:var(--blue-bg);color:var(--blue);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.cc-badge.green{background:var(--green-bg);color:var(--green)}
+.cc-badge.red{background:var(--red-bg);color:var(--red)}
+.cw{position:relative}.cw.h160{height:160px}.cw.h200{height:200px}.cw.h240{height:240px}.cw.h280{height:280px}
+
+/* TABLE */
+.tc{background:#fff;border-radius:var(--r);padding:18px;box-shadow:var(--sh1);margin-bottom:12px}
+.tc-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.tc-ttl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g2)}
+.srchbox{display:flex;gap:8px}
+.srchbox input,.srchbox select{border:1.5px solid var(--g6);border-radius:7px;padding:6px 11px;font-size:12px;outline:none;font-family:var(--font);transition:border-color .2s;color:var(--dark)}
+.srchbox input:focus,.srchbox select:focus{border-color:var(--blue)}
+.srchbox input{width:210px}
+.twrap{overflow-x:auto;max-height:380px;overflow-y:auto}
+.twrap.tall{max-height:460px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:linear-gradient(135deg,var(--dark),var(--blue-dk));color:#fff;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2;white-space:nowrap;cursor:pointer;transition:background .2s}
+thead th:hover{background:var(--blue)}
+tbody tr{border-bottom:1px solid var(--g7);transition:background .12s}
+tbody tr:hover{background:var(--blue-bg)}
+tbody tr.rd-cl{background:rgba(215,18,73,.04)}
+tbody tr.rd-cl:hover{background:rgba(215,18,73,.08)}
+tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
+.pg{font-size:11px;color:var(--g4);padding:8px 0;display:flex;align-items:center;gap:8px}
+.pg a{color:var(--blue);text-decoration:none;padding:2px 8px;border-radius:4px;border:1px solid var(--g6);font-size:11px}
+.pg a:hover{background:var(--blue-bg)}
+
+/* BADGES */
+.sbadge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.s-tkgp{background:rgba(245,158,11,.12);color:#B45309;border:1px solid rgba(245,158,11,.3)}
+.s-ba{background:rgba(124,58,237,.1);color:var(--purple);border:1px solid rgba(124,58,237,.25)}
+.s-dev{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(0,89,147,.2)}
+.s-uat{background:rgba(0,145,212,.1);color:var(--blue3);border:1px solid rgba(0,145,212,.25)}
+.s-accept{background:var(--green-bg);color:#047857;border:1px solid rgba(16,185,129,.3)}
+.s-golive{background:var(--red-bg);color:var(--red);border:1px solid rgba(215,18,73,.3)}
+.s-closed{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border:none;box-shadow:0 2px 6px rgba(0,89,147,.25)}
+.it-biz{background:#DBEAFE;color:#1D4ED8;font-weight:700;padding:2px 8px;border-radius:5px;font-size:10px}
+.it-erp{background:#FCE7F3;color:#BE185D;font-weight:700;padding:2px 8px;border-radius:5px;font-size:10px}
+.kv-chip{background:var(--blue-bg);color:var(--blue);font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px}
+
+/* PROGRESS */
+.pbar-wrap{background:var(--g6);border-radius:4px;overflow:hidden;position:relative}
+.pbar-wrap.h8{height:8px}.pbar-wrap.h10{height:10px}
+.pbar{height:100%;border-radius:4px;position:relative;overflow:hidden;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+.pbar::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shimmer 2s infinite}
+.pbar.blue{background:linear-gradient(90deg,var(--blue),var(--blue2))}
+.pbar.green{background:linear-gradient(90deg,var(--green),var(--green2))}
+.pbar.red{background:linear-gradient(90deg,var(--red),var(--red2))}
+.pbar.gold{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+
+/* CASA METER */
+.casa-meter{display:flex;align-items:center;gap:10px;margin-top:6px}
+.casa-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* STAT ROW */
+.stat-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.stat-chip{background:var(--g7);border:1px solid var(--g6);border-radius:8px;padding:8px 14px;font-size:12px;color:var(--g2);display:flex;flex-direction:column;gap:2px;min-width:80px}
+.stat-chip .sv{font-size:18px;font-weight:800;color:var(--dark)}
+.stat-chip .sl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--g4);font-weight:600}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.crows.c3,.crows.c13{grid-template-columns:1fr 1fr}.crows.c4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:750px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.crows.c2{grid-template-columns:1fr}.pipe-stages{flex-wrap:wrap}.pipe-arr{display:none}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-deco"><div class="hdr-circle c1"></div><div class="hdr-circle c2"></div><div class="hdr-circle c3"></div></div>
+  <div class="hdr-inner">
+    <div class="logo-wrap au">
+      <div class="logo">VietinBank</div>
+      <div class="hdr-text">
+        <h1>DASHBOARD KẾT NỐI API — BIZLINK / ERP</h1>
+        <p>Theo dõi tiến độ triển khai kết nối API Khách hàng Doanh nghiệp VVN · Năm 2026</p>
+      </div>
+    </div>
+    <div class="hdr-right au1">
+      <button class="data-mode-btn" onclick="document.getElementById('file-input').click()">📂 Import Excel</button>
+      <span class="date-badge" id="badge-date"></span>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT -->
+<div class="import-zone">
+  <div class="import-bar">
+    <span class="import-lbl">📊 Nguồn dữ liệu</span>
+    <div class="drop-box" id="drop-box" onclick="document.getElementById('file-input').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+      <span>📁</span><span>Kéo thả hoặc click để chọn file .xlsx / .xls</span>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls" onchange="onFileSelect(event)">
+    <span class="imp-status" id="imp-status"></span>
+    <button class="btn-sample" onclick="loadDefault()">↩ Dữ liệu mẫu</button>
+  </div>
+</div>
+
+<!-- MAPPER -->
+<div class="overlay" id="overlay">
+  <div class="mbox">
+    <h2>🗂 Ánh xạ cột dữ liệu</h2>
+    <p class="sub">Chọn sheet và ánh xạ từng cột để hệ thống phân tích đúng.</p>
+    <div class="msheet">
+      <label>Sheet:</label>
+      <select id="msheet" onchange="onSheetChange()"></select>
+      <span style="font-size:11px;color:var(--g4)" id="mrowcount"></span>
+    </div>
+    <div class="mprev" id="mprev"></div>
+    <div class="mgrid" id="mgrid"></div>
+    <div class="macts">
+      <button class="btn-cancel" onclick="closeOverlay()">Hủy</button>
+      <button class="btn-ok" onclick="applyMapper()">✅ Áp dụng & Phân tích</button>
+    </div>
+  </div>
+</div>
+
+<!-- STRIP -->
+<div class="strip">
+  <span id="strip-src">📌 Dữ liệu chính thức: Golive = CLOSED (sheet "Golive 30.4.2026") &nbsp;|&nbsp; Đang TK = sheet "Đang Triển khai"</span>
+  <span id="strip-filter" style="font-weight:700;color:var(--red)"></span>
+</div>
+
+<!-- FILTERS -->
+<div class="fbar">
+  <div class="fg"><label>Khu vực</label><select id="fkv" onchange="applyFilters()"><option value="">Tất cả</option></select></div>
+  <div class="fg"><label>Nhóm KH</label><select id="fgroup" onchange="applyFilters()"><option value="">Tất cả</option></select></div>
+  <div class="fg"><label>Trạng thái TK</label><select id="fstatus" onchange="applyFilters()"><option value="">Tất cả</option></select></div>
+  <div class="fg"><label>Issue Type</label><select id="fit" onchange="applyFilters()"><option value="">Tất cả</option></select></div>
+  <div class="fg"><label>Dịch vụ TK</label><select id="fsvc" onchange="applyFilters()"><option value="">Tất cả</option></select></div>
+  <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
+  <span id="fcount" style="font-size:11px;color:var(--g3)"></span>
+</div>
+
+<div class="main">
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kcard blue au1"><div class="kcard-bar"></div><div class="kcard-icon">🎯</div><div class="kcard-lbl">KH Giao 2026</div><div class="kcard-val" id="kv-plan">—</div><div class="kcard-sub">Kế hoạch toàn hệ thống</div></div>
+  <div class="kcard green au2"><div class="kcard-bar"></div><div class="kcard-icon">✅</div><div class="kcard-lbl">Đã Golive (CLOSED)</div><div class="kcard-val" id="kv-golive">—</div><div class="kcard-sub" id="kv-golive-pct">—</div></div>
+  <div class="kcard sky au2"><div class="kcard-bar"></div><div class="kcard-icon">⚙️</div><div class="kcard-lbl">Đang Triển khai</div><div class="kcard-val" id="kv-inprog">—</div><div class="kcard-sub">BA → DEV → UAT → Golive</div></div>
+  <div class="kcard red au3"><div class="kcard-bar"></div><div class="kcard-icon">⚡</div><div class="kcard-lbl">Sẵn sàng Close</div><div class="kcard-val" id="kv-ready">—</div><div class="kcard-sub">Acceptance + Golive status</div></div>
+  <div class="kcard gold au4"><div class="kcard-bar"></div><div class="kcard-icon">💰</div><div class="kcard-lbl">Casa BQ (tỷ đồng)</div><div class="kcard-val" id="kv-casa">—</div><div class="kcard-sub">Golive đến 30.4.2026</div></div>
+  <div class="kcard purple au5"><div class="kcard-bar"></div><div class="kcard-icon">📊</div><div class="kcard-lbl">GAP còn lại</div><div class="kcard-val" id="kv-gap">—</div><div class="kcard-sub" id="kv-gap-pct">—</div></div>
+</div>
+
+<!-- ALERT -->
+<div class="alert au">
+  <div class="alert-icon">⚡</div>
+  <div class="alert-body">
+    <strong><span id="al-n">23</span> hồ sơ đã Golive — cần chuyển trạng thái CLOSED ngay để ghi nhận deal!</strong>
+    <span>Đây là các hồ sơ có trạng thái "Golive" (14) và "Acceptance" (9) trong sheet Đang Triển khai</span>
+    <div class="alert-chips">
+      <span class="achip" id="alc-kv7">KV 7 — đang kiểm tra</span>
+      <span class="achip" id="alc-kv1">KV 1 — đang kiểm tra</span>
+      <span class="achip" id="alc-kv3">KV 3 — đang kiểm tra</span>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div class="pipe-wrap au">
+  <div class="pipe-header">
+    <div class="pipe-ttl">PIPELINE <span>ĐANG TRIỂN KHAI</span> — Click để lọc nhanh</div>
+    <div class="pipe-legend">
+      <span><i style="background:var(--gold)"></i>Chờ duyệt</span>
+      <span><i style="background:var(--blue)"></i>Đang dev</span>
+      <span><i style="background:var(--green)"></i>Hoàn thiện</span>
+      <span><i style="background:var(--red)"></i>Cần Close</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px" id="pipeline"></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs au">
+  <div class="tab active" onclick="switchTab('ov')">📊 Tổng quan</div>
+  <div class="tab" onclick="switchTab('tk')">⚙️ Đang Triển khai <span class="tbadge red" id="tn-tk">93</span></div>
+  <div class="tab" onclick="switchTab('gl')">✅ Đã Golive <span class="tbadge green" id="tn-gl">84</span></div>
+  <div class="tab" onclick="switchTab('kv')">🗺 Theo Khu vực</div>
+  <div class="tab" onclick="switchTab('cn')">🏦 Theo Chi nhánh</div>
+</div>
+
+<!-- TAB OVERVIEW -->
+<div class="tab-content active" id="tab-ov">
+  <!-- Row 1 -->
+  <div class="crows c3">
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Golive theo <span class="hi">Tháng</span> (2026)</div><span class="cc-badge green" id="b-timeline"></span></div>
+      <div class="cw h200"><canvas id="c-timeline"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Nhóm KH <span class="hi">Đang TK</span></div></div>
+      <div class="cw h200"><canvas id="c-grp-tk"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Nhóm KH <span class="hi">Đã Golive</span></div></div>
+      <div class="cw h200"><canvas id="c-grp-gl"></canvas></div>
+    </div>
+  </div>
+  <!-- Row 2 -->
+  <div class="crows c2">
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Casa BQ theo <span class="hi">Khu vực</span></div><span class="cc-badge gold" id="b-casa-kv"></span></div>
+      <div class="cw h240"><canvas id="c-casa-kv"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl"><span class="hi">Dịch vụ TK</span> của Golive deals</div><span class="cc-badge" id="b-svc-gl"></span></div>
+      <div class="cw h240"><canvas id="c-svc-gl"></canvas></div>
+    </div>
+  </div>
+  <!-- Row 3 -->
+  <div class="crows c2">
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Trạng thái <span class="hi">Đang Triển khai</span></div><span class="cc-badge" id="b-st-tk"></span></div>
+      <div class="cw h160"><canvas id="c-st-tk"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl"><span class="hi">Issue Type</span> — Đang TK vs Golive</div></div>
+      <div class="cw h160"><canvas id="c-it-cmp"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB IN-PROGRESS -->
+<div class="tab-content" id="tab-tk">
+  <div class="tc">
+    <div class="tc-hd">
+      <div class="tc-ttl">Danh sách <span id="tk-count" style="color:var(--red)"></span></div>
+      <div class="srchbox">
+        <input id="stk" placeholder="Tìm tên KH, mã key..." oninput="renderTK()">
+        <select id="stk-st" onchange="renderTK()"><option value="">Tất cả TT</option></select>
+      </div>
+    </div>
+    <div class="twrap"><table>
+      <thead><tr>
+        <th>Mã Key</th><th onclick="stkSort('status')">Trạng thái ⇅</th>
+        <th>Tên Khách hàng</th><th>KV</th><th>Chi nhánh</th>
+        <th>Nhóm KH</th><th>Phần mềm</th><th>Cần thực hiện</th>
+      </tr></thead>
+      <tbody id="tk-body"></tbody>
+    </table></div>
+    <div class="pg" id="tk-pg"></div>
+  </div>
+</div>
+
+<!-- TAB GOLIVE -->
+<div class="tab-content" id="tab-gl">
+  <div class="crows c4" style="margin-bottom:12px">
+    <div class="cc" style="padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--g4);font-weight:700;letter-spacing:.5px;margin-bottom:4px">Tổng Golive</div>
+      <div style="font-size:28px;font-weight:900;color:var(--green)" id="mg-total">84</div>
+    </div>
+    <div class="cc" style="padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--g4);font-weight:700;letter-spacing:.5px;margin-bottom:4px">Casa BQ</div>
+      <div style="font-size:28px;font-weight:900;color:var(--gold)" id="mg-casa">812.99</div>
+      <div style="font-size:10px;color:var(--g4)">tỷ đồng</div>
+    </div>
+    <div class="cc" style="padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--g4);font-weight:700;letter-spacing:.5px;margin-bottom:4px">Bệnh viện</div>
+      <div style="font-size:28px;font-weight:900;color:var(--red)" id="mg-bv">29</div>
+    </div>
+    <div class="cc" style="padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--g4);font-weight:700;letter-spacing:.5px;margin-bottom:4px">Bizlink / ERP</div>
+      <div style="font-size:24px;font-weight:900;color:var(--blue)"><span id="mg-biz">66</span> / <span id="mg-erp" style="color:var(--red)">18</span></div>
+    </div>
+  </div>
+  <div class="tc">
+    <div class="tc-hd">
+      <div class="tc-ttl">Danh sách <span style="color:var(--green)" id="gl-count"></span> hồ sơ đã Golive (CLOSED)</div>
+      <div class="srchbox">
+        <input id="sgl" placeholder="Tìm tên KH..." oninput="renderGL()">
+        <select id="sgl-kv" onchange="renderGL()"><option value="">Tất cả KV</option></select>
+      </div>
+    </div>
+    <div class="twrap"><table>
+      <thead><tr>
+        <th>Mã Key</th><th>Tên Khách hàng</th><th>KV</th><th>Chi nhánh</th>
+        <th>Nhóm KH</th><th>Dịch vụ TK</th><th>Issue Type</th>
+        <th>Ngày Golive</th><th style="text-align:right">Casa BQ (tỷ)</th>
+      </tr></thead>
+      <tbody id="gl-body"></tbody>
+    </table></div>
+    <div class="pg" id="gl-pg"></div>
+  </div>
+</div>
+
+<!-- TAB KV -->
+<div class="tab-content" id="tab-kv">
+  <div class="crows c2">
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Kế hoạch vs Golive vs <span class="hi">Đang TK</span></div></div>
+      <div class="cw h280"><canvas id="c-kv-plan"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hd"><div class="cc-ttl">Casa BQ <span class="hi">Golive</span> theo Khu vực (tỷ đ)</div><span class="cc-badge gold" id="b-kv-casa-ttl"></span></div>
+      <div class="cw h280"><canvas id="c-kv-casa"></canvas></div>
+    </div>
+  </div>
+  <div class="tc">
+    <div class="tc-hd"><div class="tc-ttl">Bảng tổng hợp theo Khu vực</div></div>
+    <div class="twrap"><table>
+      <thead><tr><th>KV</th><th>KH 2026</th><th>Đã Golive</th><th>% Golive</th><th>Đang TK</th><th>Tổng xử lý</th><th>GAP</th><th>Tiến độ</th><th>Casa BQ (tỷ)</th></tr></thead>
+      <tbody id="kv-body"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- TAB CN -->
+<div class="tab-content" id="tab-cn">
+  <div class="tc">
+    <div class="tc-hd">
+      <div class="tc-ttl">Chi nhánh <span id="cn-cnt" style="color:var(--blue)"></span> <span style="color:var(--g4);font-weight:400;font-size:10px">(🔴 Vượt KH = GAP âm)</span></div>
+      <div class="srchbox">
+        <input id="scn" placeholder="Tìm chi nhánh, CB..." oninput="renderCN()">
+        <select id="scn-kv" onchange="renderCN()"><option value="">Tất cả KV</option></select>
+        <select id="scn-gap" onchange="renderCN()">
+          <option value="">Tất cả GAP</option>
+          <option value="neg">🔴 Vượt KH</option>
+          <option value="zero">✅ Đạt đúng</option>
+          <option value="pos">⚪ Còn GAP</option>
+        </select>
+      </div>
+    </div>
+    <div class="twrap tall"><table>
+      <thead><tr><th>KV</th><th>Mã CN</th><th>Tên Chi nhánh</th><th>KH 2026</th><th>Đã Golive</th><th>Đang TK</th><th>GAP</th><th>Tiến độ</th><th>CB Phụ trách</th></tr></thead>
+      <tbody id="cn-body"></tbody>
+    </table></div>
+    <div class="pg" id="cn-pg"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+const DEF = {"inprog": [{"key": "TAS0302-10849", "status": "TKGP Review", "name": "BENH VIEN DA KHOA NGHI LOC", "branch": "441 - CN Cửa Lò", "branch_code": "441", "kv": "KV 4", "group": "Bệnh viện", "software": "EHC", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10847", "status": "TKGP Approval", "name": "TRUONG DAI HOC THANH DONG", "branch": "346 - KCN Hải Dương", "branch_code": "346", "kv": "KV 2", "group": "Trường học", "software": "ASC", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10838", "status": "TKGP Review", "name": "BENH VIEN UNG BUOU NGHE AN", "branch": "440 - CN Nghệ An", "branch_code": "440", "kv": "KV 4", "group": "Bệnh viện", "software": "EHC", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10834", "status": "TKGP Review", "name": "TRUONG DAI HOC LAM NGHIEP", "branch": "328 - CN Tây Thăng Long", "branch_code": "328", "kv": "KV 3", "group": "Trường học", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10829", "status": "TKGP Review", "name": "TRUONG DAI HOC CONG NGHE DONG A", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "Trường học", "software": "PM thanh toán học phí tự động kết nối với PM QL đào tạo", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10825", "status": "BA", "name": "CONG TY TNHH KHACH SAN HOA HONG BIEN", "branch": "424 - CN Bắc Thanh Hóa", "branch_code": "424", "kv": "KV 4", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10817", "status": "BA", "name": "CONG TY TNHH CUOC SONG VUI KHOE", "branch": "900 - CN TP. HCM", "branch_code": "900", "kv": "KV 7", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10816", "status": "BA", "name": "TRUONG DAI HOC CNTT VA TRUYEN THONG", "branch": "220 - CN Thái Nguyên", "branch_code": "220", "kv": "KV 1", "group": "Trường học", "software": "Công ty CP Giải pháp Giáo dục- Y tế Nam Việt", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-10797", "status": "BA", "name": "TRUONG DAI HOC SU PHAM", "branch": "220 - CN Thái Nguyên", "branch_code": "220", "kv": "KV 1", "group": "Trường học", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9908", "status": "DEV", "name": "CONG TY CP CONG NGHE TRUONG MINH THINH", "branch": "922 - CN 6 - TP. HCM", "branch_code": "922", "kv": "KV 7", "group": "Đối tác phần mềm", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9901", "status": "BA", "name": "BENH VIEN UNG BUOU TP CAN THO", "branch": "820 - CN Cần Thơ", "branch_code": "820", "kv": "KV 6", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9895", "status": "BA", "name": "BENH VIEN NHI HA NOI", "branch": "320 - CN Thành An", "branch_code": "320", "kv": "KV 3", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9894", "status": "TKGP Review", "name": "CONG TY CP TAP DOAN CONG NGHE HTP", "branch": "140 - CN Nam Thăng Long", "branch_code": "140", "kv": "KV 3", "group": "Fintech", "software": "Kết nối cổng dịch vụ công quốc gia", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9893", "status": "Acceptance", "name": "CONG TY TNHH LAVA SPORTS", "branch": "842 - CN Phú Quốc", "branch_code": "842", "kv": "KV 6", "group": "", "software": "API", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9890", "status": "DEV", "name": "CONG TY CO PHAN SEEDCOM TRADING", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "Acumatica", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9889", "status": "BA", "name": "BENH VIEN DA KHOA HAU LOC", "branch": "422 - CN Sầm Sơn", "branch_code": "422", "kv": "KV 4", "group": "Bệnh viện", "software": "VietQrpay và Kiosk thông minh", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9885", "status": "DEV", "name": "BENH VIEN PHUC HOI CHUC NANG TINH TAY NINH", "branch": "660 - CN Tây Ninh", "branch_code": "660", "kv": "KV 7", "group": "Bệnh viện", "software": "VNPT", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9884", "status": "DEV", "name": "TRUONG DAI HOC KINH TE VA QUAN TRI KINH DOANH", "branch": "220 - CN Thái Nguyên", "branch_code": "220", "kv": "KV 1", "group": "Trường học", "software": "Công ty cổ phần dịch vụ APIS", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9881", "status": "DEV", "name": "TRUNG TAM Y TE DIEN BIEN PHU", "branch": "184 - CN Điện Biên", "branch_code": "184", "kv": "KV 1", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9879", "status": "DEV", "name": "TRUONG DH TON DUC THANG", "branch": "910 - CN Nam Sài Gòn", "branch_code": "910", "kv": "KV 7", "group": "Trường học", "software": "Trường tự viết", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9877", "status": "DEV", "name": "CONG TY TNHH GENE CLINIC", "branch": "900 - CN TP. HCM", "branch_code": "900", "kv": "KV 7", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9876", "status": "DEV", "name": "CONG TY TNHH GIAO DUC TUYET LY", "branch": "131 - CN Đông Hà Nội", "branch_code": "131", "kv": "KV 3", "group": "Trường học", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9875", "status": "BA", "name": "TRUNG TAM Y TE CHAU PHU", "branch": "740 - CN An Giang", "branch_code": "740", "kv": "KV 6", "group": "Bệnh viện", "software": "CTCP LEOPARD SOLUTIONS", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9874", "status": "UAT", "name": "CONG TY CO PHAN SEEDCOM TRADING", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9868", "status": "DEV", "name": "CT TNHH DT PHAT TRIEN TM VA DV NAP XUYEN", "branch": "285 - CN KCN Tiên Sơn", "branch_code": "285", "kv": "KV 1", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9845", "status": "DEV", "name": "BENH VIEN DA KHOA KIEN GIANG", "branch": "840 - CN Kiên Giang", "branch_code": "840", "kv": "KV 6", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9843", "status": "UAT", "name": "CONG TY TNHH CONNEXION VIET NAM", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "Fintech", "software": "V-Smart Pay", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9834", "status": "DEV", "name": "CONG TY CO PHAN DUOC VAT TU Y TE PHAN ANH", "branch": "280 - CN Bắc Giang", "branch_code": "280", "kv": "KV 1", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9799", "status": "UAT", "name": "TT NGOAI NGU - TIN HOC TRUONG DH KINH TE", "branch": "486 - CN Ngũ Hành Sơn", "branch_code": "486", "kv": "KV 5", "group": "Trường học", "software": "Misa", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9797", "status": "DEV", "name": "CTY CP CONG NGHE FINVIET", "branch": "900 - CN TP. HCM", "branch_code": "900", "kv": "KV 7", "group": "Fintech", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9796", "status": "DEV", "name": "CTY CP CONG NGHE FINVIET", "branch": "900 - CN TP. HCM", "branch_code": "900", "kv": "KV 7", "group": "Fintech", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9790", "status": "UAT", "name": "TRUNG TAM KIEM SOAT BENH TAT TINH THAI NGUYEN", "branch": "220 - CN Thái Nguyên", "branch_code": "220", "kv": "KV 1", "group": "Bệnh viện", "software": "VNPT HIS", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9788", "status": "UAT", "name": "BENH VIEN TAM THAN NGHE AN", "branch": "440 - CN Nghệ An", "branch_code": "440", "kv": "KV 4", "group": "Bệnh viện", "software": "EHC", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9782", "status": "Golive", "name": "TRAM Y TE PHUONG PHU THO HOA", "branch": "944 - CN 12 - TP. HCM", "branch_code": "944", "kv": "KV 7", "group": "Bệnh viện", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9781", "status": "DEV", "name": "CT TNHH QUOC TE DAIICHI GROUP", "branch": "169 - CN Kiến An", "branch_code": "169", "kv": "KV 2", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9778", "status": "DEV", "name": "CTCP DAU TU BAT DONG SAN MY DINH", "branch": "324 - CN Quang Trung", "branch_code": "324", "kv": "KV 3", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9776", "status": "Golive", "name": "PHAN HIEU TRUONG DAI HOC GIAO THONG VAN TAI TAI TP HO CHI MINH", "branch": "947 - CN Thủ Đức", "branch_code": "947", "kv": "KV 7", "group": "Trường học", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9775", "status": "DEV", "name": "CONG TY TNHH TM VA XNK LONG PHUONG GROUP", "branch": "195 - CN Hà Giang", "branch_code": "195", "kv": "KV 1", "group": "", "software": "Khác", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9771", "status": "Acceptance", "name": "CTY CP CAP THOAT NUOC BEN TRE", "branch": "780 - CN Bến Tre", "branch_code": "780", "kv": "KV 6", "group": "KHDN", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9770", "status": "Golive", "name": "CONG TY TNHH FEIN", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9769", "status": "Golive", "name": "CONG TY TNHH DAU TU DINER", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9768", "status": "Golive", "name": "CONG TY TNHH MIDNIGHT RESTAURANT", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9767", "status": "Golive", "name": "CONG TY CO PHAN NEXT LEVEL SERVICES", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9766", "status": "Golive", "name": "CT TNHH NHA HANG FAHAM", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9759", "status": "UAT", "name": "CONG TY CP NHA KHOA QUOC TE BTN", "branch": "300 - CN Quảng Ninh", "branch_code": "300", "kv": "KV 2", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9758", "status": "Golive", "name": "HOC VIEN CAN BO TP HO CHI MINH", "branch": "906 - CN 3 TP. HCM", "branch_code": "906", "kv": "KV 7", "group": "Trường học", "software": "VNPT", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9753", "status": "DEV", "name": "BENH VIEN DA KHOA NGHI LOC", "branch": "441 - CN Cửa Lò", "branch_code": "441", "kv": "KV 4", "group": "Bệnh viện", "software": "EHC", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9750", "status": "Golive", "name": "CTY CO PHAN BENH VIEN DA KHOA AN SINH", "branch": "174 - CN Tuyên Quang", "branch_code": "174", "kv": "KV 1", "group": "Bệnh viện", "software": "Trí Thành", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9743", "status": "DEV", "name": "TRUNG TAM Y TE KHU VUC VAN YEN", "branch": "170 - CN Yên Bái", "branch_code": "170", "kv": "KV 1", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9740", "status": "UAT", "name": "BENH VIEN 199", "branch": "490 - CN Sông Hàn", "branch_code": "490", "kv": "KV 5", "group": "Bệnh viện", "software": "HIS DTMED", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9733", "status": "DEV", "name": "BENH VIEN QUAN Y 7", "branch": "340 - CN Hải Dương", "branch_code": "340", "kv": "KV 2", "group": "Bệnh viện", "software": "TAG", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9731", "status": "Golive", "name": "CONG TY TNHH LOLLA", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9726", "status": "Golive", "name": "CONG TY TNHH ZION RESTAURANT", "branch": "930 - CN Gia Định", "branch_code": "930", "kv": "KV 7", "group": "", "software": "fast", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9713", "status": "DEV", "name": "CONG TY TNHH BENH VIEN DA KHOA SO 10", "branch": "820 - CN Cần Thơ", "branch_code": "820", "kv": "KV 6", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9702", "status": "Acceptance", "name": "CTCP BENH VIEN MAT VIET AN DA NANG", "branch": "488 - CN Bắc Đà Nẵng", "branch_code": "488", "kv": "KV 5", "group": "Bệnh viện", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9694", "status": "BA", "name": "CONG TY CP Y DUOC TRI DUC", "branch": "420 - CN Thanh Hoá", "branch_code": "420", "kv": "KV 4", "group": "Bệnh viện", "software": "HIS", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9691", "status": "Acceptance", "name": "TRUNG TAM Y TE LONG XUYEN", "branch": "740 - CN An Giang", "branch_code": "740", "kv": "KV 6", "group": "Bệnh viện", "software": "HIS VNPT", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9685", "status": "UAT", "name": "CONG TY CO PHAN TAN PHU LONG", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9684", "status": "UAT", "name": "CONG TY CP DAU TU PHAT TRIEN AN SINH", "branch": "343 - CN Bắc Hưng Yên", "branch_code": "343", "kv": "KV 2", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9666", "status": "DEV", "name": "BENH VIEN TAM THAN HA NAM", "branch": "384 - CN Hà Nam", "branch_code": "384", "kv": "KV 4", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9664", "status": "DEV", "name": "CTCP SAN GON BA NA SUOI MO", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "", "software": "SAPP", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9661", "status": "Acceptance", "name": "CONG TY CO PHAN STAAAR", "branch": "131 - CN Đông Hà Nội", "branch_code": "131", "kv": "KV 3", "group": "KHDN", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9660", "status": "DEV", "name": "CONG TY CO PHAN CONG NGHE SO SSI", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "Đối tác phần mềm", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9658", "status": "DEV", "name": "CONG TY CO PHAN CONG NGHE SO SSI", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "Đối tác phần mềm", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9652", "status": "Golive", "name": "TRUNG TAM Y TE VIET YEN", "branch": "280 - CN Bắc Giang", "branch_code": "280", "kv": "KV 1", "group": "Bệnh viện", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9646", "status": "DEV", "name": "CTY TNHH DOCUMENT EASY", "branch": "901 - CN KCN Bình Dương", "branch_code": "901", "kv": "KV 7", "group": "KHDN", "software": "ALOBO đặt lịch", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9640", "status": "UAT", "name": "BENH VIEN NOI TIET TINH QUANG NGAI", "branch": "520 - CN Quảng Ngãi", "branch_code": "520", "kv": "KV 5", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9639", "status": "DEV", "name": "TRUONG THCS VA THPT LUONG THE VINH", "branch": "127 - CN Thanh Xuân", "branch_code": "127", "kv": "KV 3", "group": "Trường học", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9616", "status": "UAT", "name": "BENH VIEN TW QUAN DOI 108", "branch": "140 - CN Nam Thăng Long", "branch_code": "140", "kv": "KV 3", "group": "", "software": "Kết nối ERP", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9614", "status": "Acceptance", "name": "CTY CP BENH VIEN DA KHOA THANG HOA", "branch": "482 - CN Quảng Nam", "branch_code": "482", "kv": "KV 5", "group": "Bệnh viện", "software": "Viettel", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9610", "status": "Acceptance", "name": "CTY CO PHAN CAP NUOC GIA TAN", "branch": "680 - CN Đồng Nai", "branch_code": "680", "kv": "KV 7", "group": "KHDN", "software": "misa", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9557", "status": "DEV", "name": "TRUNG TAM Y TE KHU VUC VAN CHAN", "branch": "170 - CN Yên Bái", "branch_code": "170", "kv": "KV 1", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9544", "status": "Acceptance", "name": "CTY TNHH TIEN DE", "branch": "320 - CN Thành An", "branch_code": "320", "kv": "KV 3", "group": "KHDN", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9541", "status": "DEV", "name": "BENH VIEN DA KHOA HA NAM", "branch": "384 - CN Hà Nam", "branch_code": "384", "kv": "KV 4", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9513", "status": "UAT", "name": "CTCP GIAO DUC VA DAO TAO DREAM HOUSE (OIS)", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "Trường học", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9508", "status": "UAT", "name": "BENH VIEN DA KHOA KHU VUC MAI SON", "branch": "190 - CN Sơn La", "branch_code": "190", "kv": "KV 1", "group": "Bệnh viện", "software": "HIS", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9481", "status": "UAT", "name": "BENH VIEN QUAN Y 4", "branch": "442 - CN TP Vinh", "branch_code": "442", "kv": "KV 4", "group": "Bệnh viện", "software": "Viettel", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9480", "status": "DEV", "name": "CONG TY CO PHAN Y DUOC TAM AN BINH", "branch": "144 - CN Đông Anh", "branch_code": "144", "kv": "KV 3", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9477", "status": "DEV", "name": "BENH VIEN THAN - KHOANG SAN", "branch": "142 - CN Hai Bà Trưng", "branch_code": "142", "kv": "KV 3", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9436", "status": "Acceptance", "name": "CTY CP BEN XE TAU PHA CAN THO", "branch": "820 - CN Cần Thơ", "branch_code": "820", "kv": "KV 6", "group": "KHDN", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-9336", "status": "DEV", "name": "CONG TY TNHH AN DIEN", "branch": "124 - CN Ba Đình", "branch_code": "124", "kv": "KV 3", "group": "KHDN", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9310", "status": "DEV", "name": "CTY CP BENH VIEN VIET NHAT ME LINH", "branch": "264 - CN Quang Minh", "branch_code": "264", "kv": "KV 3", "group": "Bệnh viện", "software": "Minh Lộ", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-9305", "status": "DEV", "name": "CTCP CANG DICH VU DAU KHI DINH VU", "branch": "161 - CN Bắc Hải Phòng", "branch_code": "161", "kv": "KV 2", "group": "KHDN", "software": "Phần mềm SPM", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8478", "status": "DEV", "name": "TRUNG TAM Y TE KHU VUC NHON TRACH", "branch": "681 - CN Nhơn Trạch", "branch_code": "681", "kv": "KV 7", "group": "Bệnh viện", "software": "FPT SOFTWARE", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8364", "status": "DEV", "name": "BENH VIEN DA KHOA THAI BINH", "branch": "360 - CN Thái Bình", "branch_code": "360", "kv": "KV 4", "group": "Bệnh viện", "software": "VIETSEN", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8257", "status": "DEV", "name": "BENH VIEN TRUONG DAI HOC Y-DUOC HUE", "branch": "460 - CN Thừa Thiên Huế", "branch_code": "460", "kv": "KV 5", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8222", "status": "DEV", "name": "CONG TY TNHH Y TE VIET THUAN", "branch": "316 - CN Đông Quảng Ninh", "branch_code": "316", "kv": "KV 2", "group": "Bệnh viện", "software": "Công ty TNHH công nghệ M3Soft Việt Nam", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8211", "status": "Golive", "name": "CONG TY TNHH GIAO DUC KHAI NGUYEN", "branch": "926 - CN 8 - TP. HCM", "branch_code": "926", "kv": "KV 7", "group": "KHDN", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}, {"key": "TAS0302-8208", "status": "UAT", "name": "BENH VIEN TRUONG DAI HOC Y-DUOC HUE", "branch": "460 - CN Thừa Thiên Huế", "branch_code": "460", "kv": "KV 5", "group": "Bệnh viện", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8196", "status": "UAT", "name": "BENH VIEN BACH MAI", "branch": "136 - CN Hoàng Mai", "branch_code": "136", "kv": "KV 3", "group": "Bệnh viện", "software": "Vietsens", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-8131", "status": "UAT", "name": "Bệnh viện phục hồi chức năng Bắc Ninh", "branch": "280 - CN Bắc Giang", "branch_code": "280", "kv": "KV 1", "group": "Bệnh viện", "software": "VNPT Bắc Giang", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-7958", "status": "UAT", "name": "CTCP thương mại đầu tư Long Biên", "branch": "129 - CN Bắc Hà Nội", "branch_code": "129", "kv": "KV 3", "group": "", "software": "", "action": "3. Đang triển khai => Bám sát đẩy nhanh tiến độ", "ready_close": false}, {"key": "TAS0302-7897", "status": "Golive", "name": "CONG TY CP DICH VU EPAY", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "kv": "KV 3", "group": "Fintech", "software": "", "action": "4. Chuyển sang trạng thái Close để được ghi nhận deal", "ready_close": true}], "golive": [{"key": "TAS0302-10458", "name": "CONG TY CO PHAN CONG NGHE LIEN KET SO VN", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "CONG TY CO PHAN CONG NGHE LIEN KET SO VN", "start_date": "23/04/2026", "deploy_month": "2026-04", "deploy_date": "28/04/2026", "casa": 0.03652198716}, {"key": "TAS0302-9850", "name": "CN CTCP DU LICH VIETRAVEL-TRUNG TAM MICE MIEN BAC", "kv": "KV 3", "branch": "326 - CN Thăng Long", "branch_code": "326", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "fpt", "start_date": "06/04/2026", "deploy_month": "2026-05", "deploy_date": "06/05/2026", "casa": 0.37587970646}, {"key": "TAS0302-9844", "name": "CN CTCP DL VIETRAVEL", "kv": "KV 3", "branch": "326 - CN Thăng Long", "branch_code": "326", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "fpt", "start_date": "06/04/2026", "deploy_month": "2026-04", "deploy_date": "10/04/2026", "casa": 0.96464169156}, {"key": "TAS0302-9840", "name": "CTY CP GREENEX BIOTECH SOLUTIONS", "kv": "KV 7", "branch": "660 - CN Tây Ninh", "branch_code": "660", "group": "", "segment": "KHL", "service": "", "issue_type": "ERP", "software": "CTY TỰ PHÁT TRIỂN", "start_date": "02/04/2026", "deploy_month": "2026-04", "deploy_date": "13/04/2026", "casa": 10.35151036918}, {"key": "TAS0302-9774", "name": "CTY TNHH DAU TU DICH VU HUMVENTURES", "kv": "KV 7", "branch": "928 - CN 9 - TP. HCM", "branch_code": "928", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "Fast", "start_date": "19/03/2026", "deploy_month": "2026-05", "deploy_date": "06/05/2026", "casa": 1.8300239491199999}, {"key": "TAS0302-9763", "name": "CTCP GAPIT", "kv": "KV 3", "branch": "142 - CN Hai Bà Trưng", "branch_code": "142", "group": "KHDN", "segment": "VVN", "service": "BDSD", "issue_type": "Bizlink", "software": "", "start_date": "17/03/2026", "deploy_month": "2026-04", "deploy_date": "07/04/2026", "casa": 0.00052366099}, {"key": "TAS0302-9744", "name": "CONG TY TNHH TM VA DV ANH DUONG XANH VIET NAM", "kv": "KV 3", "branch": "328 - CN Tây Thăng Long", "branch_code": "328", "group": "KHDN", "segment": "VVN", "service": "Thu hộ", "issue_type": "Bizlink", "software": "Kiot Việt", "start_date": "10/03/2026", "deploy_month": "2026-03", "deploy_date": "11/03/2026", "casa": 0.0145368957}, {"key": "TAS0302-9738", "name": "VIEN Y DUOC HOC DAN TOC", "kv": "KV 7", "branch": "900 - CN TP. HCM", "branch_code": "900", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "09/03/2026", "deploy_month": "2026-04", "deploy_date": "08/04/2026", "casa": 1.0225e-06}, {"key": "TAS0302-9736", "name": "CN CTY CO PHAN THE CHOCO VIET NAM", "kv": "KV 5", "branch": "620 - CN Lâm Đồng", "branch_code": "620", "group": "KHDN", "segment": "VVN", "service": "Thu hộ", "issue_type": "Bizlink", "software": "KiotViet", "start_date": "06/03/2026", "deploy_month": "2026-03", "deploy_date": "10/03/2026", "casa": 0.00631863774}, {"key": "TAS0302-9730", "name": "CONG TY TNHH THE BIG BANG", "kv": "KV 7", "branch": "930 - CN Gia Định", "branch_code": "930", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "FAST", "start_date": "03/03/2026", "deploy_month": "2026-05", "deploy_date": "04/05/2026", "casa": 0.9634315023}, {"key": "TAS0302-9729", "name": "CONG TY TNHH FETTI", "kv": "KV 7", "branch": "930 - CN Gia Định", "branch_code": "930", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "FAST", "start_date": "03/03/2026", "deploy_month": "2026-04", "deploy_date": "07/04/2026", "casa": 0.08349058579}, {"key": "TAS0302-9728", "name": "CONG TY TNHH NEIGHBORHOOD", "kv": "KV 7", "branch": "930 - CN Gia Định", "branch_code": "930", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "FAST", "start_date": "03/03/2026", "deploy_month": "2026-04", "deploy_date": "07/04/2026", "casa": 0.0031562812}, {"key": "TAS0302-9727", "name": "CONG TY TNHH YOUNG AND FAMOUS", "kv": "KV 7", "branch": "930 - CN Gia Định", "branch_code": "930", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "fast", "start_date": "03/03/2026", "deploy_month": "2026-05", "deploy_date": "04/05/2026", "casa": 2.67730785207}, {"key": "TAS0302-9724", "name": "CT TNHH Y TE DAI PHUOC", "kv": "KV 7", "branch": "900 - CN TP. HCM", "branch_code": "900", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "HSoft - Công ty TNHH Tin Học Đăng Quang", "start_date": "03/03/2026", "deploy_month": "2026-04", "deploy_date": "16/04/2026", "casa": 0.03088666504}, {"key": "TAS0302-9722", "name": "CONG TY TNHH LOCO HEATROOM", "kv": "KV 7", "branch": "930 - CN Gia Định", "branch_code": "930", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "FAST", "start_date": "02/03/2026", "deploy_month": "2026-04", "deploy_date": "07/04/2026", "casa": 0.0}, {"key": "TAS0302-9721", "name": "CT TNHH DAU TU NHA HANG LOCO", "kv": "KV 7", "branch": "930 - CN Gia Định", "branch_code": "930", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "FAST", "start_date": "02/03/2026", "deploy_month": "2026-05", "deploy_date": "04/05/2026", "casa": 0.32306139165}, {"key": "TAS0302-9715", "name": "SO CONG THUONG TINH LAI CHAU", "kv": "KV 3", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "group": "Chính phủ", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "24/02/2026", "deploy_month": "2026-02", "deploy_date": "27/02/2026", "casa": 0.00970587435}, {"key": "TAS0302-9701", "name": "CONG TY CO PHAN CAP NUOC PHU MY", "kv": "KV 7", "branch": "880 - CN Bà Rịa - Vũng Tàu", "branch_code": "880", "group": "KHDN", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "10/02/2026", "deploy_month": "2026-04", "deploy_date": "01/04/2026", "casa": 0.9945337884}, {"key": "TAS0302-9690", "name": "SKYTECH-HTX GIAO THONG VAN TAI PHUC NGUYEN", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "VVN-924-KHDN-HTX GT VT PHUC NGUYEN-Chi hộ", "start_date": "04/02/2026", "deploy_month": "2026-02", "deploy_date": "11/02/2026", "casa": 0.20983306541}, {"key": "TAS0302-9689", "name": "SKYTECH- HTX DL VT CO GIOI NAM SAI GON", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "VVN-924-KHDN-HTX DL VT CO GIO INAM SAI GON-Chi hộ", "start_date": "04/02/2026", "deploy_month": "2026-02", "deploy_date": "11/02/2026", "casa": 0.22194011961}, {"key": "TAS0302-9688", "name": "SKYTECH- HOP TAC XA VAN TAI THANH VY", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "", "start_date": "04/02/2026", "deploy_month": "2026-02", "deploy_date": "11/02/2026", "casa": 0.02342375161}, {"key": "TAS0302-9687", "name": "SKYTECH-HOP TAC XA VAN TAI MINH VY", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "VVN-924-KHDN-HTX VT MINH VY-Chi hộ", "start_date": "04/02/2026", "deploy_month": "2026-02", "deploy_date": "11/02/2026", "casa": 0.0}, {"key": "TAS0302-9686", "name": "SKYTECH-HOP TAC XA VAN TAI VIET LONG", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "", "start_date": "04/02/2026", "deploy_month": "2026-02", "deploy_date": "11/02/2026", "casa": 0.05966990026}, {"key": "TAS0302-9653", "name": "BENH VIEN DA KHOA BINH PHUOC", "kv": "KV 7", "branch": "504 - CN Bình Phước", "branch_code": "504", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "28/01/2026", "deploy_month": "2026-03", "deploy_date": "17/03/2026", "casa": 8.48996466455}, {"key": "TAS0302-9650", "name": "TRUNG TAM Y TE KHU VUC THANH SON", "kv": "KV 3", "branch": "324 - CN Quang Trung", "branch_code": "324", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "HIS", "start_date": "27/01/2026", "deploy_month": "2026-03", "deploy_date": "27/03/2026", "casa": 0.07253084456}, {"key": "TAS0302-9645", "name": "SKYTẸCH- HTX DT VA CN VAN TAI VIEN DONG SAI GON", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "", "start_date": "27/01/2026", "deploy_month": "2026-02", "deploy_date": "06/02/2026", "casa": 0.04687995059}, {"key": "TAS0302-9644", "name": "SKYTECH- HTX VAN TAI HOANG LONG", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "", "start_date": "27/01/2026", "deploy_month": "2026-02", "deploy_date": "06/02/2026", "casa": 1.169554e-05}, {"key": "TAS0302-9641", "name": "CT CP BENH VIEN THAI THINH", "kv": "KV 3", "branch": "126 - CN Đống Đa", "branch_code": "126", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "27/01/2026", "deploy_month": "2026-03", "deploy_date": "27/03/2026", "casa": 0.06664221168}, {"key": "TAS0302-9629", "name": "BENH VIEN DA KHOA BAC KAN", "kv": "KV 1", "branch": "172 - CN Bắc Kạn", "branch_code": "172", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "QR CODE", "start_date": "23/01/2026", "deploy_month": "2026-02", "deploy_date": "27/02/2026", "casa": 1.83224213933}, {"key": "TAS0302-9625", "name": "BENH VIEN Y HOC CO TRUYEN BINH PHUOC", "kv": "KV 7", "branch": "504 - CN Bình Phước", "branch_code": "504", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "23/01/2026", "deploy_month": "2026-01", "deploy_date": "30/01/2026", "casa": 1.00414644311}, {"key": "TAS0302-9623", "name": "CONG TY TNHH DICH VU DU LICH CHAN TAM", "kv": "KV 4", "branch": "384 - CN Hà Nam", "branch_code": "384", "group": "KHDN", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "CT CP GIẢI PHÁP CÔNG NGHỆ NEWWAY", "start_date": "22/01/2026", "deploy_month": "2026-02", "deploy_date": "25/02/2026", "casa": 9.961221775079999}, {"key": "TAS0302-9622", "name": "TRUONG CAO DANG CONG NGHE THU DUC", "kv": "KV 7", "branch": "947 - CN Thủ Đức", "branch_code": "947", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "CÔNG TY TNHH PHẦN MỀM VÀ TƯ VẤN KIM TỰ THÁP (PSC)", "start_date": "22/01/2026", "deploy_month": "2026-02", "deploy_date": "12/02/2026", "casa": 0.64650673958}, {"key": "TAS0302-9619", "name": "TRUNG TAM Y TE HON DAT", "kv": "KV 6", "branch": "840 - CN Kiên Giang", "branch_code": "840", "group": "Bệnh viện", "segment": "VVN", "service": "QR động", "issue_type": "Bizlink", "software": "", "start_date": "22/01/2026", "deploy_month": "2026-02", "deploy_date": "13/02/2026", "casa": 5.20644619123}, {"key": "TAS0302-9618", "name": "CONG TY TNHH CONG NGHE SKY TECH VN", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "KHDN", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "ĐỊNH DANH TÀI KHOẢN", "start_date": "22/01/2026", "deploy_month": "2026-02", "deploy_date": "04/02/2026", "casa": 0.00015893465}, {"key": "TAS0302-9613", "name": "TRUONG DAI HOC CAN THO", "kv": "KV 6", "branch": "820 - CN Cần Thơ", "branch_code": "820", "group": "Trường học", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "21/01/2026", "deploy_month": "2026-02", "deploy_date": "04/02/2026", "casa": 3.81582974183}, {"key": "TAS0302-9608", "name": "CONG TY CP MIEN THUE VIET NAM", "kv": "KV 7", "branch": "924 - CN 7 - TP. HCM", "branch_code": "924", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "BRAVO", "start_date": "20/01/2026", "deploy_month": "2026-03", "deploy_date": "11/03/2026", "casa": 2.25617910903}, {"key": "TAS0302-9603", "name": "BENH VIEN TAM THAN NGHE AN", "kv": "KV 4", "branch": "440 - CN Nghệ An", "branch_code": "440", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "VNPT", "start_date": "19/01/2026", "deploy_month": "2026-03", "deploy_date": "23/03/2026", "casa": 6.49003748653}, {"key": "TAS0302-9567", "name": "BENH VIEN PHU SAN TRUNG UONG", "kv": "KV 3", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "THANH TOAN VIETQR MAP", "start_date": "15/01/2026", "deploy_month": "2026-03", "deploy_date": "18/03/2026", "casa": 135.33207881933}, {"key": "TAS0302-9562", "name": "TRUNG TAM Y TE KHU VUC YEN BINH", "kv": "KV 1", "branch": "170 - CN Yên Bái", "branch_code": "170", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "14/01/2026", "deploy_month": "2026-03", "deploy_date": "11/03/2026", "casa": 7.79984029752}, {"key": "TAS0302-9548", "name": "CT CP DUOC PHAM DUOC LIEU PHARMEDIC", "kv": "KV 7", "branch": "900 - CN TP. HCM", "branch_code": "900", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "SAP", "start_date": "07/01/2026", "deploy_month": "2026-01", "deploy_date": "16/01/2026", "casa": 15.85060044383}, {"key": "TAS0302-9546", "name": "CTCP BENH VIEN THAM MY KANGNAM HA NOI", "kv": "KV 3", "branch": "326 - CN Thăng Long", "branch_code": "326", "group": "KHDN", "segment": "VVN", "service": "QR động", "issue_type": "Bizlink", "software": "", "start_date": "07/01/2026", "deploy_month": "2026-04", "deploy_date": "07/04/2026", "casa": 7.218126956879999}, {"key": "TAS0302-9535", "name": "CONG TY CO PHAN DUOC VAT TU Y TE PHAN ANH", "kv": "KV 1", "branch": "280 - CN Bắc Giang", "branch_code": "280", "group": "KHDN", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Dịch vụ chấp nhận thanh toán VietQRPay", "start_date": "31/12/2025", "deploy_month": "2026-03", "deploy_date": "10/03/2026", "casa": 0.40552445351}, {"key": "TAS0302-9528", "name": "CT TNHH SAN GIAO DICH BDS RESA HOLDINGS", "kv": "KV 4", "branch": "442 - CN TP Vinh", "branch_code": "442", "group": "KHDN", "segment": "VVN", "service": "BDSD", "issue_type": "Bizlink", "software": "", "start_date": "26/12/2025", "deploy_month": "2026-04", "deploy_date": "17/04/2026", "casa": 0.022929821}, {"key": "TAS0302-9525", "name": "BAN QUAN TRI CHUNG CU LINDEN RESIDENCES", "kv": "KV 7", "branch": "902 - CN 1 - TP. HCM", "branch_code": "902", "group": "KHDN", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Green Smart", "start_date": "25/12/2025", "deploy_month": "2026-04", "deploy_date": "01/04/2026", "casa": 1.66667058249}, {"key": "TAS0302-9517", "name": "CT CP DUOC PHAM CPC1 HA NOI-CN HA NOI", "kv": "KV 4", "branch": "360 - CN Thái Bình", "branch_code": "360", "group": "KHDN", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "23/12/2025", "deploy_month": "2026-01", "deploy_date": "28/01/2026", "casa": 1.1376223779}, {"key": "TAS0302-9507", "name": "TRUONG DH QUAN LY VA CONG NGHE HP", "kv": "KV 2", "branch": "168 - CN Ngô Quyền", "branch_code": "168", "group": "Trường học", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Công ty CP Giải pháp giáo dục ASC", "start_date": "19/12/2025", "deploy_month": "2026-01", "deploy_date": "30/01/2026", "casa": 2.06677952252}, {"key": "TAS0302-9469", "name": "CTY TNHH DAU TU THUONG MAI THU TAM", "kv": "KV 7", "branch": "900 - CN TP. HCM", "branch_code": "900", "group": "KHDN", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "12/12/2025", "deploy_month": "2026-02", "deploy_date": "11/02/2026", "casa": 0.50655867488}, {"key": "TAS0302-9460", "name": "TTGD QUOC PHONG VA AN NINH DHQG TPHCM", "kv": "KV 7", "branch": "947 - CN Thủ Đức", "branch_code": "947", "group": "Trường học", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "11/12/2025", "deploy_month": "2026-01", "deploy_date": "05/01/2026", "casa": 1.7963810034}, {"key": "TAS0302-9416", "name": "CONG TY CO PHAN Y DUOC 3P", "kv": "KV 3", "branch": "131 - CN Đông Hà Nội", "branch_code": "131", "group": "KHDN", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Fast", "start_date": "10/12/2025", "deploy_month": "2026-03", "deploy_date": "04/03/2026", "casa": 0.30539291491}, {"key": "TAS0302-9341", "name": "TRUONG DAI HOC BACH KHOA", "kv": "KV 5", "branch": "488 - CN Bắc Đà Nẵng", "branch_code": "488", "group": "Trường học", "segment": "VVN", "service": "Thanh toán hóa đơn", "issue_type": "Bizlink", "software": "", "start_date": "04/12/2025", "deploy_month": "2026-03", "deploy_date": "19/03/2026", "casa": 16.91710577509}, {"key": "TAS0302-9328", "name": "CONG TY TNHH NAM PHUONG - PHONG KHAM DAKHOA NAM PHUONG", "kv": "KV 6", "branch": "860 - CN Cà Mau", "branch_code": "860", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "CÔNG TY TNHH GIẢI PHÁP KỸ THUẬT SỐ DH", "start_date": "26/11/2025", "deploy_month": "2026-03", "deploy_date": "09/03/2026", "casa": 3.0770680149}, {"key": "TAS0302-9327", "name": "CONG TY TNHH PHUONG NAM - PHONG KHAM DAKHOA PHUONG NAM", "kv": "KV 6", "branch": "860 - CN Cà Mau", "branch_code": "860", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Công ty TNHH Giải Pháp Kỹ Thuật Số DH", "start_date": "26/11/2025", "deploy_month": "2026-03", "deploy_date": "09/03/2026", "casa": 2.92477309928}, {"key": "TAS0302-9314", "name": "TRUONG DAI HOC SU PHAM-DAI HOC DA NANG", "kv": "KV 5", "branch": "488 - CN Bắc Đà Nẵng", "branch_code": "488", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "21/11/2025", "deploy_month": "2026-03", "deploy_date": "03/03/2026", "casa": 17.00072895392}, {"key": "TAS0302-9313", "name": "CONG TY TNHH BAN LE MEAT24", "kv": "KV 1", "branch": "240 - CN Phú Thọ", "branch_code": "240", "group": "KHDN", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "", "start_date": "21/11/2025", "deploy_month": "2026-03", "deploy_date": "25/03/2026", "casa": 0.35457180901}, {"key": "TAS0302-9309", "name": "CT CP DAU TU HA TANG KY THUAT TPHCM", "kv": "KV 7", "branch": "942 - CN 11 TP. HCM", "branch_code": "942", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "Basic", "start_date": "19/11/2025", "deploy_month": "2026-01", "deploy_date": "19/01/2026", "casa": 10.69650336504}, {"key": "TAS0302-9295", "name": "CONG TY TNHH BENH VIEN DA KHOA BAO SON", "kv": "KV 3", "branch": "328 - CN Tây Thăng Long", "branch_code": "328", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "BRAVO", "start_date": "17/11/2025", "deploy_month": "2026-01", "deploy_date": "09/01/2026", "casa": 9.40992539895}, {"key": "TAS0302-9290", "name": "BENH VIEN NHI DONG 2", "kv": "KV 7", "branch": "900 - CN TP. HCM", "branch_code": "900", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Cty CP Vietrad", "start_date": "13/11/2025", "deploy_month": "2026-01", "deploy_date": "05/01/2026", "casa": 104.95101543542}, {"key": "TAS0302-9283", "name": "BENH VIEN DA KHOA TINH QUANG TRI", "kv": "KV 4", "branch": "450 - CN Quảng Trị", "branch_code": "450", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "QUẢN LÝ KHOẢN PHẢI THU THÔNG QUA ĐỊNH DANH TÀI KHOẢN", "start_date": "12/11/2025", "deploy_month": "2026-03", "deploy_date": "23/03/2026", "casa": 46.19501239054}, {"key": "TAS0302-9263", "name": "TRUNG TAM Y TE KHU VUC BAO LOC", "kv": "KV 5", "branch": "622 - CN Bảo Lộc", "branch_code": "622", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "VNPT", "start_date": "06/11/2025", "deploy_month": "2026-03", "deploy_date": "26/03/2026", "casa": 0.58160946886}, {"key": "TAS0302-9253", "name": "CONG TY CO PHAN BENH VIEN TIM TAM DUC", "kv": "KV 7", "branch": "908 - CN 4 - TP. HCM", "branch_code": "908", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "03/11/2025", "deploy_month": "2026-01", "deploy_date": "08/01/2026", "casa": 0.0}, {"key": "TAS0302-9247", "name": "TRUONG DAI HOC HUNG VUONG", "kv": "KV 1", "branch": "242 - CN Hùng Vương", "branch_code": "242", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "EDU SOFT", "start_date": "30/10/2025", "deploy_month": "2026-03", "deploy_date": "03/03/2026", "casa": 13.50499854299}, {"key": "TAS0302-9243", "name": "CONG TY TNHH MTV DAU TU MINH PHONG", "kv": "KV 1", "branch": "282 - CN Bắc Ninh", "branch_code": "282", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "kết nối ERP", "start_date": "30/10/2025", "deploy_month": "2026-01", "deploy_date": "16/01/2026", "casa": 0.90342202608}, {"key": "TAS0302-9238", "name": "BENH VIEN DA KHOA THIEU HOA", "kv": "KV 4", "branch": "422 - CN Sầm Sơn", "branch_code": "422", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "Minh Lộ", "start_date": "29/10/2025", "deploy_month": "2026-01", "deploy_date": "28/01/2026", "casa": 0.29184981866000004}, {"key": "TAS0302-9232", "name": "UY BAN NHAN DAN PHUONG DUC NHUAN", "kv": "KV 7", "branch": "904 - CN 2 - TP. HCM", "branch_code": "904", "group": "Chính phủ", "segment": "VVN", "service": "QR động", "issue_type": "Bizlink", "software": "VNPT", "start_date": "28/10/2025", "deploy_month": "2026-01", "deploy_date": "28/01/2026", "casa": 0.0165283194}, {"key": "TAS0302-8544", "name": "CONG TY CO PHAN DIEN LUC ADP", "kv": "KV 5", "branch": "490 - CN Sông Hàn", "branch_code": "490", "group": "KHDN", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "EMEC", "start_date": "24/10/2025", "deploy_month": "2026-03", "deploy_date": "12/03/2026", "casa": 0.62858532849}, {"key": "TAS0302-8526", "name": "BENH VIEN DA KHOA QUANG XUONG", "kv": "KV 4", "branch": "422 - CN Sầm Sơn", "branch_code": "422", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Minh Lộ", "start_date": "21/10/2025", "deploy_month": "2026-02", "deploy_date": "25/02/2026", "casa": 8.1302788457}, {"key": "TAS0302-8502", "name": "TRUONG DAI HOC SU PHAM KY THUAT HUNG YEN", "kv": "KV 2", "branch": "343 - CN Bắc Hưng Yên", "branch_code": "343", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "phần mềm Nam việt (Esoft)", "start_date": "09/10/2025", "deploy_month": "2026-01", "deploy_date": "12/01/2026", "casa": 18.17394576207}, {"key": "TAS0302-8494", "name": "CONG TY CO PHAN KIM TIN MARBLE", "kv": "KV 7", "branch": "906 - CN 3 TP. HCM", "branch_code": "906", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "Lemon3", "start_date": "08/10/2025", "deploy_month": "2026-03", "deploy_date": "10/03/2026", "casa": 9.69929308316}, {"key": "TAS0302-8450", "name": "TRUNG TAM Y TE KHU VUC DUC LINH", "kv": "KV 5", "branch": "600 - CN Bình Thuận", "branch_code": "600", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "VNPT Bình Thuận", "start_date": "26/09/2025", "deploy_month": "2026-02", "deploy_date": "03/02/2026", "casa": 0.09045454918}, {"key": "TAS0302-8424", "name": "BENH VIEN DA KHOA NAM TIEN HAI", "kv": "KV 4", "branch": "360 - CN Thái Bình", "branch_code": "360", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "19/09/2025", "deploy_month": "2026-01", "deploy_date": "16/01/2026", "casa": 7.40780197712}, {"key": "TAS0302-8420", "name": "CONG TY CO PHAN UPHARMA", "kv": "KV 4", "branch": "360 - CN Thái Bình", "branch_code": "360", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "CNTT của công ty tự built", "start_date": "18/09/2025", "deploy_month": "2026-02", "deploy_date": "27/02/2026", "casa": 5.93729070283}, {"key": "TAS0302-8407", "name": "BENH VIEN DA KHOA TINH HUNG YEN", "kv": "KV 2", "branch": "342 - CN Hưng Yên", "branch_code": "342", "group": "Bệnh viện", "segment": "VVN", "service": "Chi hộ", "issue_type": "Bizlink", "software": "TRÍ NAM", "start_date": "16/09/2025", "deploy_month": "2026-04", "deploy_date": "01/04/2026", "casa": 7.84683125341}, {"key": "TAS0302-8392", "name": "BENH VIEN KIEN AN", "kv": "KV 2", "branch": "161 - CN Bắc Hải Phòng", "branch_code": "161", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "10/09/2025", "deploy_month": "2026-01", "deploy_date": "07/01/2026", "casa": 16.94215138087}, {"key": "TAS0302-8381", "name": "TRUNG TAM Y TE NGO QUYEN", "kv": "KV 2", "branch": "168 - CN Ngô Quyền", "branch_code": "168", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Công ty TNHH Minh Lộ", "start_date": "09/09/2025", "deploy_month": "2026-03", "deploy_date": "19/03/2026", "casa": 3.14184542502}, {"key": "TAS0302-8377", "name": "BENH VIEN PHU SAN THANH PHO CAN THO", "kv": "KV 6", "branch": "820 - CN Cần Thơ", "branch_code": "820", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "HIS FPT", "start_date": "08/09/2025", "deploy_month": "2026-01", "deploy_date": "08/01/2026", "casa": 115.34995692026}, {"key": "TAS0302-8368", "name": "BENH VIEN QUAN DAN Y TINH CA MAU", "kv": "KV 6", "branch": "860 - CN Cà Mau", "branch_code": "860", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "VIETTEL", "start_date": "05/09/2025", "deploy_month": "2026-04", "deploy_date": "13/04/2026", "casa": 1.89101919887}, {"key": "TAS0302-8330", "name": "BỆNH VIỆN TRUNG ƯƠNG QUÂN ĐỘI 108", "kv": "KV 3", "branch": "140 - CN Nam Thăng Long", "branch_code": "140", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "Công ty CP phần mềm quản lý doanh nghiệp FAST", "start_date": "25/08/2025", "deploy_month": "2026-01", "deploy_date": "22/01/2026", "casa": 123.69136893811}, {"key": "TAS0302-8319", "name": "CT TNHH MTV HOA KHANH NAM", "kv": "KV 5", "branch": "520 - CN Quảng Ngãi", "branch_code": "520", "group": "KHDN", "segment": "VVN", "service": "BDSD", "issue_type": "Bizlink", "software": "Bravo", "start_date": "20/08/2025", "deploy_month": "2026-02", "deploy_date": "09/02/2026", "casa": 0.20414065976}, {"key": "TAS0302-8275", "name": "BENH VIEN TRUONG DAI HOC Y DUOC", "kv": "KV 1", "branch": "220 - CN Thái Nguyên", "branch_code": "220", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "Helix", "start_date": "07/08/2025", "deploy_month": "2026-01", "deploy_date": "16/01/2026", "casa": 0.71666393521}, {"key": "TAS0302-8035", "name": "Công ty TNHH Oxu Việt Nam", "kv": "KV 1", "branch": "285 - CN KCN Tiên Sơn", "branch_code": "285", "group": "KHDN", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "17/06/2025", "deploy_month": "2026-03", "deploy_date": "30/03/2026", "casa": 0.14286343484}, {"key": "TAS0302-8023", "name": "Bệnh viện Mắt Hải Phòng", "kv": "KV 2", "branch": "164 - CN Lê Chân", "branch_code": "164", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "Minh Lộ", "start_date": "16/06/2025", "deploy_month": "2026-01", "deploy_date": "19/01/2026", "casa": 3.98771431588}, {"key": "TAS0302-7904", "name": "Trung tâm y tế huyện Nam Sách", "kv": "KV 2", "branch": "346 - KCN Hải Dương", "branch_code": "346", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "VNPT", "start_date": "15/05/2025", "deploy_month": "2026-01", "deploy_date": "12/01/2026", "casa": 6.2062880639}, {"key": "TAS0302-6453", "name": "Trường đại học Hải Phòng", "kv": "KV 2", "branch": "160 - CN Hải Phòng", "branch_code": "160", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "23/08/2024", "deploy_month": "2026-02", "deploy_date": "06/02/2026", "casa": 22.79648325267}, {"key": "TAS0302-9542", "name": "CONG TY TNHH KIDO EDU", "kv": "KV 7", "branch": "940 - CN 10 TP. HCM", "branch_code": "940", "group": "KHDN", "segment": "", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "", "start_date": "06/01/2026", "deploy_month": "2026-02", "deploy_date": "03/02/2026", "casa": 0.0}], "cn": [{"kv": "1", "branch_code": "170", "branch_name": "Yên Bái", "plan": 2, "golive": 1, "in_progress": 2, "gap": -1, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "172", "branch_name": "Bắc Cạn", "plan": 1, "golive": 1, "in_progress": 0, "gap": 0, "staff": "Dương Thanh Lịch"}, {"kv": "1", "branch_code": "174", "branch_name": "Tuyên Quang", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "180", "branch_name": "Lào Cai", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Phạm Trung Tuyến"}, {"kv": "1", "branch_code": "182", "branch_name": "Lai Châu", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Phạm Trung Tuyến"}, {"kv": "1", "branch_code": "184", "branch_name": "Điện Biên", "plan": 1, "golive": 0, "in_progress": 1, "gap": 0, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "186", "branch_name": "Cao Bằng", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Dương Thanh Lịch"}, {"kv": "1", "branch_code": "190", "branch_name": "Sơn La", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "195", "branch_name": "Hà Giang", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "200", "branch_name": "Lạng Sơn", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Dương Thanh Lịch"}, {"kv": "1", "branch_code": "220", "branch_name": "Thái Nguyên", "plan": 2, "golive": 1, "in_progress": 4, "gap": -3, "staff": "Phạm Trung Tuyến"}, {"kv": "1", "branch_code": "222", "branch_name": "Nam Thái Nguyên", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Phạm Trung Tuyến"}, {"kv": "1", "branch_code": "224", "branch_name": "Lưu Xá", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Phạm Trung Tuyến"}, {"kv": "1", "branch_code": "240", "branch_name": "Phú Thọ", "plan": 2, "golive": 1, "in_progress": 0, "gap": 1, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "242", "branch_name": "Hùng Vương", "plan": 2, "golive": 1, "in_progress": 0, "gap": 1, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "244", "branch_name": "TX Phú Thọ", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "246", "branch_name": "Vĩnh Phúc", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Dương Thanh Lịch"}, {"kv": "1", "branch_code": "248", "branch_name": "Bắc Phú Thọ", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Lê Thị Trâm Anh"}, {"kv": "1", "branch_code": "250", "branch_name": "Hòa Bình", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "260", "branch_name": "Phúc Yên", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Dương Thanh Lịch"}, {"kv": "1", "branch_code": "262", "branch_name": "Bình Xuyên", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Dương Thanh Lịch"}, {"kv": "1", "branch_code": "280", "branch_name": "Bắc Giang", "plan": 5, "golive": 2, "in_progress": 3, "gap": 0, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "282", "branch_name": "Bắc Ninh", "plan": 4, "golive": 1, "in_progress": 0, "gap": 3, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "284", "branch_name": "Tiên Sơn", "plan": 5, "golive": 0, "in_progress": 0, "gap": 5, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "285", "branch_name": "KCN Tiên Sơn", "plan": 3, "golive": 1, "in_progress": 1, "gap": 1, "staff": "Nguyễn Ngọc Tú"}, {"kv": "1", "branch_code": "289", "branch_name": "Quế Võ", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Ngọc Tú"}, {"kv": "2", "branch_code": "160", "branch_name": "Hải Phòng", "plan": 4, "golive": 1, "in_progress": 0, "gap": 3, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "161", "branch_name": "Bắc Hải Phòng", "plan": 5, "golive": 1, "in_progress": 1, "gap": 3, "staff": "Đỗ Anh Tuấn"}, {"kv": "2", "branch_code": "162", "branch_name": "Đông Hải Phòng", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Đỗ Anh Tuấn"}, {"kv": "2", "branch_code": "164", "branch_name": "Lê Chân", "plan": 4, "golive": 1, "in_progress": 0, "gap": 3, "staff": "Nguyễn Thị Thanh Hà"}, {"kv": "2", "branch_code": "166", "branch_name": "Hồng Bàng", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Đỗ Anh Tuấn"}, {"kv": "2", "branch_code": "168", "branch_name": "Ngô Quyền", "plan": 5, "golive": 2, "in_progress": 0, "gap": 3, "staff": "Nguyễn Thị Thanh Hà"}, {"kv": "2", "branch_code": "169", "branch_name": "Kiến An", "plan": 4, "golive": 0, "in_progress": 1, "gap": 3, "staff": "Đỗ Anh Tuấn"}, {"kv": "2", "branch_code": "300", "branch_name": "Quảng Ninh", "plan": 5, "golive": 0, "in_progress": 1, "gap": 4, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "302", "branch_name": "Cẩm Phả", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Đỗ Anh Tuấn"}, {"kv": "2", "branch_code": "304", "branch_name": "Uông Bí", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "306", "branch_name": "Tây Quang Ninh", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "308", "branch_name": "Móng Cái", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "316", "branch_name": "Đông Quảng Ninh", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "340", "branch_name": "Hải Dương", "plan": 4, "golive": 0, "in_progress": 1, "gap": 3, "staff": "Nguyễn Thị Thanh Hà"}, {"kv": "2", "branch_code": "342", "branch_name": "Hưng Yên", "plan": 4, "golive": 1, "in_progress": 0, "gap": 3, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "343", "branch_name": "Bắc Hưng Yên", "plan": 4, "golive": 1, "in_progress": 1, "gap": 2, "staff": "Phạm Gia Tú"}, {"kv": "2", "branch_code": "344", "branch_name": "Đông Hải Dương", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Thị Thanh Hà"}, {"kv": "2", "branch_code": "346", "branch_name": "Tây Hải Phòng", "plan": 4, "golive": 1, "in_progress": 1, "gap": 2, "staff": "Nguyễn Thị Thanh Hà"}, {"kv": "4", "branch_code": "360", "branch_name": "Thái Bình", "plan": 9, "golive": 3, "in_progress": 1, "gap": 5, "staff": "Hoàng Thị Lan Chi"}, {"kv": "4", "branch_code": "380", "branch_name": "Nam Định", "plan": 7, "golive": 0, "in_progress": 0, "gap": 7, "staff": "Phạm Linh Vũ Liên"}, {"kv": "4", "branch_code": "382", "branch_name": "Bắc Nam Định", "plan": 10, "golive": 0, "in_progress": 0, "gap": 10, "staff": "Phạm Linh Vũ Liên"}, {"kv": "4", "branch_code": "384", "branch_name": "Hà Nam", "plan": 6, "golive": 1, "in_progress": 2, "gap": 3, "staff": "Hoàng Thị Lan Chi"}, {"kv": "4", "branch_code": "400", "branch_name": "Ninh Bình", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Phạm Linh Vũ Liên"}, {"kv": "4", "branch_code": "402", "branch_name": "Tam Điệp", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Phạm Linh Vũ Liên"}, {"kv": "4", "branch_code": "420", "branch_name": "Thanh Hóa", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Hoàng Thị Lan Chi"}, {"kv": "4", "branch_code": "422", "branch_name": "Sầm Sơn", "plan": 3, "golive": 2, "in_progress": 1, "gap": 0, "staff": "Hoàng Thị Lan Chi"}, {"kv": "4", "branch_code": "424", "branch_name": "Bắc Thanh Hóa", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Hoàng Thị Lan Chi"}, {"kv": "4", "branch_code": "430", "branch_name": "Hà Tĩnh", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Tuấn Anh"}, {"kv": "4", "branch_code": "440", "branch_name": "Nghệ An", "plan": 5, "golive": 1, "in_progress": 2, "gap": 2, "staff": "Nguyễn Tuấn Anh"}, {"kv": "4", "branch_code": "441", "branch_name": "Cửa Lò", "plan": 1, "golive": 0, "in_progress": 2, "gap": -1, "staff": "Nguyễn Tuấn Anh"}, {"kv": "4", "branch_code": "442", "branch_name": "Thành phố Vinh", "plan": 5, "golive": 1, "in_progress": 1, "gap": 3, "staff": "Nguyễn Tuấn Anh"}, {"kv": "4", "branch_code": "444", "branch_name": "Bắc Nghệ An", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Tuấn Anh"}, {"kv": "4", "branch_code": "450", "branch_name": "Quảng Trị", "plan": 3, "golive": 1, "in_progress": 0, "gap": 2, "staff": "Phạm Linh Vũ Liên"}, {"kv": "4", "branch_code": "470", "branch_name": "Quảng Bình", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Phạm Linh Vũ Liên"}, {"kv": "5", "branch_code": "460", "branch_name": "Thừa Thiên Huế", "plan": 7, "golive": 0, "in_progress": 4, "gap": 3, "staff": "Nguyễn Việt Dũng"}, {"kv": "5", "branch_code": "462", "branch_name": "Nam Thừa Thiên Huế", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Việt Dũng"}, {"kv": "5", "branch_code": "480", "branch_name": "Đà Nẵng", "plan": 8, "golive": 0, "in_progress": 0, "gap": 8, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "482", "branch_name": "Nam Đà Nẵng", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "484", "branch_name": "Hội An", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "486", "branch_name": "Ngũ Hành Sơn", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "488", "branch_name": "Bắc Đà Nẵng", "plan": 4, "golive": 2, "in_progress": 1, "gap": 1, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "490", "branch_name": "Sông Hàn", "plan": 5, "golive": 1, "in_progress": 1, "gap": 3, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "500", "branch_name": "Gia Lai", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Hoài Nam"}, {"kv": "5", "branch_code": "502", "branch_name": "Đắc Lắc", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Nguyễn Hoài Nam"}, {"kv": "5", "branch_code": "506", "branch_name": "Đắc Nông", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Hoài Nam"}, {"kv": "5", "branch_code": "510", "branch_name": "Kon Tum", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Tô Khánh Huyền"}, {"kv": "5", "branch_code": "520", "branch_name": "Quảng Ngãi", "plan": 2, "golive": 1, "in_progress": 1, "gap": 0, "staff": "Tô Khánh Huyền"}, {"kv": "5", "branch_code": "540", "branch_name": "Bình Định", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Tô Khánh Huyền"}, {"kv": "5", "branch_code": "542", "branch_name": "KCN Phú Tài", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Tô Khánh Huyền"}, {"kv": "5", "branch_code": "560", "branch_name": "Phú Yên", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Việt Dũng"}, {"kv": "5", "branch_code": "580", "branch_name": "Khánh Hòa", "plan": 6, "golive": 0, "in_progress": 0, "gap": 6, "staff": "Trần Thanh Loan"}, {"kv": "5", "branch_code": "600", "branch_name": "Bình Thuận", "plan": 3, "golive": 1, "in_progress": 0, "gap": 2, "staff": "Nguyễn Hoài Nam"}, {"kv": "5", "branch_code": "610", "branch_name": "Ninh Thuận", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Việt Dũng"}, {"kv": "5", "branch_code": "620", "branch_name": "Lâm Đồng", "plan": 2, "golive": 1, "in_progress": 0, "gap": 1, "staff": "Nguyễn Hoài Nam"}, {"kv": "5", "branch_code": "622", "branch_name": "Bảo Lộc", "plan": 2, "golive": 1, "in_progress": 0, "gap": 1, "staff": "Nguyễn Hoài Nam"}, {"kv": "6", "branch_code": "700", "branch_name": "Long An", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Nguyễn Văn Tuấn"}, {"kv": "6", "branch_code": "704", "branch_name": "Bến Lức", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Văn Tuấn"}, {"kv": "6", "branch_code": "720", "branch_name": "Đồng Tháp", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "724", "branch_name": "Sa Đéc", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "740", "branch_name": "An Giang", "plan": 4, "golive": 0, "in_progress": 2, "gap": 2, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "742", "branch_name": "Châu Đốc", "plan": 1, "golive": 0, "in_progress": 0, "gap": 1, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "760", "branch_name": "Tiền Giang", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "762", "branch_name": "Tây Tiền Giang", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "780", "branch_name": "Bến Tre", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "800", "branch_name": "Vĩnh Long", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "820", "branch_name": "Cần Thơ", "plan": 4, "golive": 2, "in_progress": 3, "gap": -1, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "821", "branch_name": "Hậu Giang", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "822", "branch_name": "Sóc Trăng", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Văn Tuấn"}, {"kv": "6", "branch_code": "824", "branch_name": "Tây Cần Thơ", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "840", "branch_name": "Kiên Giang", "plan": 4, "golive": 1, "in_progress": 1, "gap": 2, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "842", "branch_name": "Phú Quốc", "plan": 1, "golive": 0, "in_progress": 1, "gap": 0, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "860", "branch_name": "Cà Mau", "plan": 4, "golive": 3, "in_progress": 0, "gap": 1, "staff": "Ngô Phương Linh"}, {"kv": "6", "branch_code": "862", "branch_name": "Bạc Liêu", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Phạm Thị Thanh Loan"}, {"kv": "6", "branch_code": "980", "branch_name": "Trà Vinh", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Phạm Thị Thanh Loan"}, {"kv": "7", "branch_code": "900", "branch_name": "TP HCM", "plan": 5, "golive": 5, "in_progress": 4, "gap": -4, "staff": "Phạm Thùy Linh"}, {"kv": "7", "branch_code": "924", "branch_name": "Chi nhánh 7", "plan": 5, "golive": 10, "in_progress": 0, "gap": -5, "staff": "Nguyễn Hữu Chiến"}, {"kv": "7", "branch_code": "923", "branch_name": "Tây Sài Gòn", "plan": 5, "golive": 0, "in_progress": 0, "gap": 5, "staff": "Hà Văn Tiến"}, {"kv": "7", "branch_code": "908", "branch_name": "Chi nhánh 4", "plan": 5, "golive": 1, "in_progress": 0, "gap": 4, "staff": "Phạm Hồng Giang"}, {"kv": "7", "branch_code": "640", "branch_name": "Bình Dương", "plan": 5, "golive": 0, "in_progress": 0, "gap": 5, "staff": "Phạm Hồng Giang"}, {"kv": "7", "branch_code": "680", "branch_name": "Đồng Nai", "plan": 5, "golive": 0, "in_progress": 1, "gap": 4, "staff": "Phạm Hồng Giang"}, {"kv": "7", "branch_code": "901", "branch_name": "KCN Bình Dương", "plan": 4, "golive": 0, "in_progress": 1, "gap": 3, "staff": "Nguyễn Văn Tuấn"}, {"kv": "7", "branch_code": "682", "branch_name": "KCN Biên Hòa", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Phạm Thùy Linh"}, {"kv": "7", "branch_code": "903", "branch_name": "Thủ Thiêm", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Hà Văn Tiến"}, {"kv": "7", "branch_code": "928", "branch_name": "Chi nhánh 9", "plan": 4, "golive": 1, "in_progress": 0, "gap": 3, "staff": "Nguyễn Thị Kim Anh"}, {"kv": "7", "branch_code": "904", "branch_name": "Chi nhánh 2", "plan": 3, "golive": 1, "in_progress": 0, "gap": 2, "staff": "Phạm Hồng Giang"}, {"kv": "7", "branch_code": "910", "branch_name": "Nam Sài Gòn", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Phạm Thùy Linh"}, {"kv": "7", "branch_code": "880", "branch_name": "Bà Rịa - Vũng Tàu", "plan": 3, "golive": 1, "in_progress": 0, "gap": 2, "staff": "Nguyễn Thị Kim Anh"}, {"kv": "7", "branch_code": "940", "branch_name": "Chi nhánh 10", "plan": 3, "golive": 1, "in_progress": 0, "gap": 2, "staff": "Nguyễn Thị Kim Anh"}, {"kv": "7", "branch_code": "902", "branch_name": "Chi nhánh 1", "plan": 3, "golive": 1, "in_progress": 0, "gap": 2, "staff": "Phạm Hồng Giang"}, {"kv": "7", "branch_code": "946", "branch_name": "Đông Sài Gòn", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Hữu Chiến"}, {"kv": "7", "branch_code": "944", "branch_name": "Chi nhánh 12", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Hà Văn Tiến"}, {"kv": "7", "branch_code": "945", "branch_name": "Tân Bình", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Văn Tuấn"}, {"kv": "7", "branch_code": "942", "branch_name": "Chi nhánh 11", "plan": 2, "golive": 1, "in_progress": 0, "gap": 1, "staff": "Phạm Thùy Linh"}, {"kv": "7", "branch_code": "681", "branch_name": "Nhơn Trạch", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Hà Văn Tiến"}, {"kv": "7", "branch_code": "906", "branch_name": "Chi nhánh 3", "plan": 2, "golive": 1, "in_progress": 1, "gap": 0, "staff": "Nguyễn Thị Kim Anh"}, {"kv": "7", "branch_code": "922", "branch_name": "Chi nhánh 6", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Phạm Thùy Linh"}, {"kv": "7", "branch_code": "930", "branch_name": "Gia Định", "plan": 2, "golive": 6, "in_progress": 9, "gap": -13, "staff": "Nguyễn Hữu Chiến"}, {"kv": "7", "branch_code": "664", "branch_name": "Trảng Bàng", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Văn Tuấn"}, {"kv": "7", "branch_code": "504", "branch_name": "Bình Phước", "plan": 2, "golive": 2, "in_progress": 0, "gap": 0, "staff": "Phạm Hồng Giang"}, {"kv": "7", "branch_code": "947", "branch_name": "Thủ Đức", "plan": 2, "golive": 2, "in_progress": 1, "gap": -1, "staff": "Nguyễn Thị Kim Anh"}, {"kv": "7", "branch_code": "948", "branch_name": "Bắc Sài Gòn", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Thị Kim Anh"}, {"kv": "7", "branch_code": "932", "branch_name": "Chợ Lớn", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Phạm Thùy Linh"}, {"kv": "7", "branch_code": "920", "branch_name": "Chi nhánh 5", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Hữu Chiến"}, {"kv": "7", "branch_code": "912", "branch_name": "Sài Gòn", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Hà Văn Tiến"}, {"kv": "7", "branch_code": "926", "branch_name": "Chi nhánh 8", "plan": 2, "golive": 0, "in_progress": 1, "gap": 1, "staff": "Nguyễn Hữu Chiến"}, {"kv": "7", "branch_code": "660", "branch_name": "Tây Ninh", "plan": 2, "golive": 1, "in_progress": 1, "gap": 0, "staff": "Nguyễn Văn Tuấn"}, {"kv": "7", "branch_code": "662", "branch_name": "Hòa Thành", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Văn Tuấn"}, {"kv": "3", "branch_code": "106", "branch_name": "CN TP HA NOI", "plan": 6, "golive": 2, "in_progress": 8, "gap": -4, "staff": "Nhữ Hồng Anh"}, {"kv": "3", "branch_code": "122", "branch_name": "CN HOAN KIEM", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nhữ Hồng Anh"}, {"kv": "3", "branch_code": "124", "branch_name": "CN BA DINH", "plan": 5, "golive": 0, "in_progress": 1, "gap": 4, "staff": "Nguyễn Minh Chi"}, {"kv": "3", "branch_code": "126", "branch_name": "CN DONG DA", "plan": 5, "golive": 1, "in_progress": 0, "gap": 4, "staff": "Nguyễn Minh Chi"}, {"kv": "3", "branch_code": "127", "branch_name": "CN THANH XUAN", "plan": 4, "golive": 0, "in_progress": 1, "gap": 3, "staff": "Nhữ Hồng Anh"}, {"kv": "3", "branch_code": "128", "branch_name": "CN CHUONG DUONG", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Phạm Hồng Giang"}, {"kv": "3", "branch_code": "129", "branch_name": "CN BAC HA NOI", "plan": 4, "golive": 0, "in_progress": 1, "gap": 3, "staff": "Nguyễn Hà Trang"}, {"kv": "3", "branch_code": "131", "branch_name": "CN DONG HA NOI", "plan": 6, "golive": 1, "in_progress": 2, "gap": 3, "staff": "Lê Minh Vũ"}, {"kv": "3", "branch_code": "136", "branch_name": "CN HOANG MAI", "plan": 5, "golive": 0, "in_progress": 1, "gap": 4, "staff": "Lê Minh Vũ"}, {"kv": "3", "branch_code": "140", "branch_name": "CN NAM THANG LONG", "plan": 6, "golive": 1, "in_progress": 2, "gap": 3, "staff": "Nguyễn Hà Trang"}, {"kv": "3", "branch_code": "142", "branch_name": "CN HAI BA TRUNG", "plan": 4, "golive": 1, "in_progress": 1, "gap": 2, "staff": "Lê Minh Vũ"}, {"kv": "3", "branch_code": "144", "branch_name": "CN DONG ANH", "plan": 3, "golive": 0, "in_progress": 1, "gap": 2, "staff": "Nguyễn Hà Trang"}, {"kv": "3", "branch_code": "145", "branch_name": "CN BAC THANG LONG", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Nguyễn Minh Chi"}, {"kv": "3", "branch_code": "146", "branch_name": "CN TAY HA NOI", "plan": 4, "golive": 0, "in_progress": 0, "gap": 4, "staff": "Nguyễn Hà Trang"}, {"kv": "3", "branch_code": "188", "branch_name": "CN HA THANH", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Nguyễn Hà Trang"}, {"kv": "3", "branch_code": "189", "branch_name": "CN TRANG AN", "plan": 2, "golive": 0, "in_progress": 0, "gap": 2, "staff": "Phạm Hồng Giang"}, {"kv": "3", "branch_code": "264", "branch_name": "CN QUANG MINH", "plan": 4, "golive": 0, "in_progress": 1, "gap": 3, "staff": "Lê Minh Vũ"}, {"kv": "3", "branch_code": "320", "branch_name": "CN THANH AN", "plan": 6, "golive": 0, "in_progress": 2, "gap": 4, "staff": "Nguyễn Minh Chi"}, {"kv": "3", "branch_code": "322", "branch_name": "CN DO THANH", "plan": 3, "golive": 0, "in_progress": 0, "gap": 3, "staff": "Lê Minh Vũ"}, {"kv": "3", "branch_code": "324", "branch_name": "CN QUANG TRUNG", "plan": 3, "golive": 1, "in_progress": 1, "gap": 1, "staff": "Nhữ Hồng Anh"}, {"kv": "3", "branch_code": "326", "branch_name": "CN THANG LONG", "plan": 3, "golive": 3, "in_progress": 0, "gap": 0, "staff": "Nguyễn Hà Trang"}, {"kv": "3", "branch_code": "328", "branch_name": "CN TAY THANG LONG", "plan": 5, "golive": 2, "in_progress": 1, "gap": 2, "staff": "Phạm Hồng Giang"}], "timeline": [{"month": "2026-01", "count": 20}, {"month": "2026-02", "count": 21}, {"month": "2026-03", "count": 23}, {"month": "2026-04", "count": 15}, {"month": "2026-05", "count": 5}], "casa_by_kv": {"KV 1": 25.66, "KV 2": 81.162, "KV 3": 277.461, "KV 4": 85.574, "KV 5": 35.429, "KV 6": 132.265, "KV 7": 175.436}, "kv_stats": {"1": {"plan": 65, "golive": 9, "in_progress": 14, "gap": 42}, "2": {"plan": 60, "golive": 8, "in_progress": 7, "gap": 45}, "4": {"plan": 65, "golive": 9, "in_progress": 11, "gap": 45}, "5": {"plan": 70, "golive": 7, "in_progress": 9, "gap": 54}, "6": {"plan": 50, "golive": 6, "in_progress": 8, "gap": 36}, "7": {"plan": 100, "golive": 34, "in_progress": 23, "gap": 43}, "3": {"plan": 90, "golive": 12, "in_progress": 23, "gap": 55}}, "top_casa": [{"key": "TAS0302-9567", "name": "BENH VIEN PHU SAN TRUNG UONG", "kv": "KV 3", "branch": "106 - CN TP. Hà Nội", "branch_code": "106", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "THANH TOAN VIETQR MAP", "start_date": "15/01/2026", "deploy_month": "2026-03", "deploy_date": "18/03/2026", "casa": 135.33207881933}, {"key": "TAS0302-8330", "name": "BỆNH VIỆN TRUNG ƯƠNG QUÂN ĐỘI 108", "kv": "KV 3", "branch": "140 - CN Nam Thăng Long", "branch_code": "140", "group": "", "segment": "VVN", "service": "", "issue_type": "ERP", "software": "Công ty CP phần mềm quản lý doanh nghiệp FAST", "start_date": "25/08/2025", "deploy_month": "2026-01", "deploy_date": "22/01/2026", "casa": 123.69136893811}, {"key": "TAS0302-8377", "name": "BENH VIEN PHU SAN THANH PHO CAN THO", "kv": "KV 6", "branch": "820 - CN Cần Thơ", "branch_code": "820", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "HIS FPT", "start_date": "08/09/2025", "deploy_month": "2026-01", "deploy_date": "08/01/2026", "casa": 115.34995692026}, {"key": "TAS0302-9290", "name": "BENH VIEN NHI DONG 2", "kv": "KV 7", "branch": "900 - CN TP. HCM", "branch_code": "900", "group": "Bệnh viện", "segment": "VVN", "service": "VietQR- MAP", "issue_type": "Bizlink", "software": "Cty CP Vietrad", "start_date": "13/11/2025", "deploy_month": "2026-01", "deploy_date": "05/01/2026", "casa": 104.95101543542}, {"key": "TAS0302-9283", "name": "BENH VIEN DA KHOA TINH QUANG TRI", "kv": "KV 4", "branch": "450 - CN Quảng Trị", "branch_code": "450", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "QUẢN LÝ KHOẢN PHẢI THU THÔNG QUA ĐỊNH DANH TÀI KHOẢN", "start_date": "12/11/2025", "deploy_month": "2026-03", "deploy_date": "23/03/2026", "casa": 46.19501239054}, {"key": "TAS0302-6453", "name": "Trường đại học Hải Phòng", "kv": "KV 2", "branch": "160 - CN Hải Phòng", "branch_code": "160", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "23/08/2024", "deploy_month": "2026-02", "deploy_date": "06/02/2026", "casa": 22.79648325267}, {"key": "TAS0302-8502", "name": "TRUONG DAI HOC SU PHAM KY THUAT HUNG YEN", "kv": "KV 2", "branch": "343 - CN Bắc Hưng Yên", "branch_code": "343", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "phần mềm Nam việt (Esoft)", "start_date": "09/10/2025", "deploy_month": "2026-01", "deploy_date": "12/01/2026", "casa": 18.17394576207}, {"key": "TAS0302-9314", "name": "TRUONG DAI HOC SU PHAM-DAI HOC DA NANG", "kv": "KV 5", "branch": "488 - CN Bắc Đà Nẵng", "branch_code": "488", "group": "Trường học", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "21/11/2025", "deploy_month": "2026-03", "deploy_date": "03/03/2026", "casa": 17.00072895392}, {"key": "TAS0302-8392", "name": "BENH VIEN KIEN AN", "kv": "KV 2", "branch": "161 - CN Bắc Hải Phòng", "branch_code": "161", "group": "Bệnh viện", "segment": "VVN", "service": "Tài khoản định danh", "issue_type": "Bizlink", "software": "", "start_date": "10/09/2025", "deploy_month": "2026-01", "deploy_date": "07/01/2026", "casa": 16.94215138087}, {"key": "TAS0302-9341", "name": "TRUONG DAI HOC BACH KHOA", "kv": "KV 5", "branch": "488 - CN Bắc Đà Nẵng", "branch_code": "488", "group": "Trường học", "segment": "VVN", "service": "Thanh toán hóa đơn", "issue_type": "Bizlink", "software": "", "start_date": "04/12/2025", "deploy_month": "2026-03", "deploy_date": "19/03/2026", "casa": 16.91710577509}], "summary": {"total_plan": 500, "total_golive": 84, "total_inprog": 93, "ready_close": 23, "casa_total": 812.988, "total_branches": 83, "overperform_branches": 9}};
+
+let RAW=null, wb=null;
+let fInprog=[], fGolive=[];
+let tkSort={col:'status',asc:true}, tkPage=0, glPage=0, cnPage=0;
+const PS=50;
+let charts={};
+
+// PALETTE
+const P=['#005993','#D71249','#10B981','#F59E0B','#7ED3F7','#007DB7','#7C3AED','#0F766E','#E21D50','#1D4ED8','#047857','#C2410C'];
+function gc(i,a=1){const h=P[i%P.length];if(a<1){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}return h;}
+
+// FILE IMPORT
+function onDragOver(e){e.preventDefault();document.getElementById('drop-box').classList.add('dragover');}
+function onDragLeave(){document.getElementById('drop-box').classList.remove('dragover');}
+function onDrop(e){e.preventDefault();document.getElementById('drop-box').classList.remove('dragover');processFile(e.dataTransfer.files[0]);}
+function onFileSelect(e){processFile(e.target.files[0]);}
+function processFile(file){
+  setSt('⏳ Đang đọc...','');
+  const rd=new FileReader();
+  rd.onload=e=>{try{wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});setSt(`✅ ${file.name} (${wb.SheetNames.length} sheets)`,'ok');openMapper(wb.SheetNames);}catch(err){setSt('❌ '+err.message,'err');}};
+  rd.readAsArrayBuffer(file);
+}
+function setSt(msg,cls){const el=document.getElementById('imp-status');el.innerHTML=msg;el.className='imp-status'+(cls?' '+cls:'');}
+
+// MAPPER
+const FIELDS=[
+  {id:'key',l:'Mã Key/Ticket'},{id:'status',l:'Trạng thái'},{id:'name',l:'Tên Khách hàng'},
+  {id:'kv',l:'Khu vực'},{id:'branch',l:'Chi nhánh'},{id:'branch_code',l:'Mã CN'},
+  {id:'group',l:'Nhóm KH'},{id:'software',l:'Phần mềm'},{id:'issue_type',l:'Issue Type'},
+  {id:'action',l:'Cần thực hiện/Xử lý'},{id:'casa',l:'Casa BQ (tỷ đ)'},
+];
+function openMapper(sheets){
+  const sel=document.getElementById('msheet');sel.innerHTML=sheets.map(s=>`<option>${s}</option>`).join('');
+  document.getElementById('overlay').classList.add('show');onSheetChange();
+}
+function onSheetChange(){
+  if(!wb)return;
+  const ws=wb.Sheets[document.getElementById('msheet').value];
+  const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  const hdrs=(data[0]||[]).map(String);
+  document.getElementById('mrowcount').textContent=`${data.length-1} dòng`;
+  document.getElementById('mprev').textContent='Cột: '+hdrs.join(' | ');
+  document.getElementById('mgrid').innerHTML=FIELDS.map(f=>{
+    const opts=['<option value="">(Bỏ qua)</option>',...hdrs.map(h=>`<option value="${h}" ${am(f.id,h)?'selected':''}>${h}</option>`)].join('');
+    return `<div class="mrow"><label>${f.l}</label><select id="mf-${f.id}">${opts}</select></div>`;
+  }).join('');
+}
+function am(fid,h){const hl=h.toLowerCase();const R={key:['key','ticket'],status:['trạng thái','status'],name:['tên kh','tên khách','name'],kv:['khu vực','region'],branch:['cn đầu','chi nhánh','branch'],branch_code:['mã cn'],group:['nhóm kh','nhom'],software:['phần mềm','software','pm '],issue_type:['issue','type'],action:['xử lý','cần thực','action'],casa:['casa','số dư']};return(R[fid]||[]).some(k=>hl.includes(k));}
+function closeOverlay(){document.getElementById('overlay').classList.remove('show');}
+function applyMapper(){
+  if(!wb)return;
+  const ws=wb.Sheets[document.getElementById('msheet').value];
+  const rawD=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  const hdrs=rawD[0].map(String);
+  const mp={};FIELDS.forEach(f=>{const v=document.getElementById('mf-'+f.id).value;if(v)mp[f.id]=v;});
+  const recs=rawD.slice(1).filter(r=>r.some(c=>c!=='')).map(row=>{
+    const o={};FIELDS.forEach(f=>{const col=mp[f.id];o[f.id]=col?String(row[hdrs.indexOf(col)]??'').trim():'';});
+    o.ready_close=o.action&&o.action.startsWith('4.');
+    o.deploy_date='';o.deploy_month='';o.casa=parseFloat(o.casa)||0;
+    return o;
+  });
+  closeOverlay();setSt(`✅ ${recs.length} hồ sơ — "${document.getElementById('msheet').value}"`,'ok');
+  RAW={inprog:recs,golive:[],cn:[],timeline:[],casa_by_kv:{},kv_stats:{},top_casa:[],summary:{total_plan:0,total_golive:0,total_inprog:recs.length,ready_close:recs.filter(r=>r.ready_close).length,casa_total:0,total_branches:0,overperform_branches:0}};
+  fInprog=[...recs];fGolive=[];populateFilters();renderAll();
+}
+function loadDefault(){
+  RAW=DEF;fInprog=[...RAW.inprog];fGolive=[...RAW.golive];
+  document.getElementById('strip-src').textContent='📌 Golive = CLOSED (sheet Golive 30.4.2026) | Đang TK = sheet "Đang Triển khai"';
+  setSt('','');populateFilters();renderAll();
+}
+
+// POPULATE FILTERS
+function populateFilters(){
+  const all=[...RAW.inprog,...RAW.golive];
+  function opts(id,key,src){const vs=[...new Set(src.map(r=>r[key]).filter(Boolean))].sort();const el=document.getElementById(id);const cur=el.value;el.innerHTML='<option value="">Tất cả</option>'+vs.map(v=>`<option>${v}</option>`).join('');if(vs.includes(cur))el.value=cur;}
+  opts('fkv','kv',all);opts('fgroup','group',all);opts('fstatus','status',RAW.inprog);opts('fit','issue_type',all);opts('fsvc','service',RAW.golive);
+  opts('stk-st','status',RAW.inprog);
+  const kvs=[...new Set(all.map(r=>r.kv).filter(Boolean))].sort();
+  ['sgl-kv','scn-kv'].forEach(id=>{document.getElementById(id).innerHTML='<option value="">Tất cả KV</option>'+kvs.map(v=>`<option>${v}</option>`).join('');});
+}
+
+// APPLY FILTERS
+function applyFilters(){
+  const kv=g('fkv'),gr=g('fgroup'),st=g('fstatus'),it=g('fit'),sv=g('fsvc');
+  fInprog=RAW.inprog.filter(r=>(!kv||r.kv===kv)&&(!gr||r.group===gr)&&(!st||r.status===st)&&(!it||r.issue_type===it));
+  fGolive=RAW.golive.filter(r=>(!kv||r.kv===kv)&&(!gr||r.group===gr)&&(!it||r.issue_type===it)&&(!sv||r.service===sv));
+  tkPage=0;glPage=0;
+  const n=[kv,gr,st,it,sv].filter(Boolean).length;
+  document.getElementById('fcount').textContent=n?`${n} bộ lọc — TK:${fInprog.length} GL:${fGolive.length}`:'';
+  document.getElementById('strip-filter').textContent=n?`🔎 Lọc: ${fInprog.length}/${RAW.inprog.length} TK | ${fGolive.length}/${RAW.golive.length} GL`:'';
+  renderAll();
+}
+function resetFilters(){['fkv','fgroup','fstatus','fit','fsvc'].forEach(id=>document.getElementById(id).value='');applyFilters();}
+function g(id){return document.getElementById(id)?.value||'';}
+
+// RENDER ALL
+function renderAll(){renderKPIs();renderPipeline();renderCharts();renderTK();renderGL();renderCN();}
+
+// KPIS
+function renderKPIs(){
+  const GL=fGolive.length, TK=fInprog.length;
+  const ready=fInprog.filter(r=>r.ready_close).length;
+
+  // ── KH Giao 2026: tính từ Theo CN theo KV đang lọc ──
+  const kvFilter=g('fkv');
+  const cn=RAW?.cn||[];
+  let plan;
+  if(kvFilter){
+    // Lọc cn theo KV → tổng plan của KV đó
+    plan=cn.filter(r=>'KV '+r.kv===kvFilter||r.kv===kvFilter).reduce((a,b)=>a+b.plan,0);
+  } else {
+    plan=RAW?.summary?.total_plan||500;
+  }
+
+  // ── Casa BQ: tính từ fGolive đang lọc (không dùng giá trị cứng) ──
+  const casa=fGolive.reduce((a,b)=>a+(b.casa||0),0);
+
+  // ── GAP: kế hoạch (đã lọc) − Golive − Đang TK ──
+  const gap=plan-GL-TK;
+
+  animNum('kv-plan',plan);
+  animNum('kv-golive',GL);
+  animNum('kv-inprog',TK);
+  animNum('kv-ready',ready);
+  setT('kv-casa',casa.toFixed(1));
+  setT('kv-golive-pct',plan>0?`${Math.round(GL/plan*100)}% kế hoạch`:'—');
+  animNum('kv-gap',Math.max(0,gap));
+  setT('kv-gap-pct',plan>0?`Còn ${Math.round(Math.max(0,gap)/plan*100)}% KH chưa xử lý`:'—');
+  setT('tn-tk',TK);setT('tn-gl',GL);setT('al-n',ready);
+
+  // ── Alert chips: top KV có hồ sơ ready-close ──
+  const rcByKV={};fInprog.filter(r=>r.ready_close).forEach(r=>{rcByKV[r.kv]=(rcByKV[r.kv]||0)+1;});
+  const top3=Object.entries(rcByKV).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const chips=['alc-kv7','alc-kv1','alc-kv3'];
+  chips.forEach((cid,i)=>{const el=document.getElementById(cid);if(el){el.style.display='';if(top3[i])el.textContent=`${top3[i][0]}: ${top3[i][1]} hồ sơ`;else el.style.display='none';}});
+
+  // ── Golive tab stats ──
+  const grpGL={};fGolive.forEach(r=>{grpGL[r.group]=(grpGL[r.group]||0)+1;});
+  const itGL={Bizlink:0,ERP:0};fGolive.forEach(r=>{if(itGL.hasOwnProperty(r.issue_type))itGL[r.issue_type]++;});
+  setT('mg-total',GL);setT('mg-casa',casa.toFixed(2));
+  setT('mg-bv',grpGL['Bệnh viện']||0);setT('mg-biz',itGL.Bizlink);setT('mg-erp',itGL.ERP);
+  setT('gl-count',`${fGolive.length} hồ sơ`);
+}
+function animNum(id,target){
+  const el=document.getElementById(id);if(!el)return;
+  let t=0,dur=700,si=16;
+  const tm=setInterval(()=>{t+=si;el.textContent=Math.round(target*Math.min(t/dur,1));if(t>=dur){el.textContent=target;clearInterval(tm);}},si);
+}
+function setT(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+// PIPELINE
+const ST_ORDER=[
+  {k:'TKGP Review',c:'tkgp'},{k:'TKGP Approval',c:'tkgp'},
+  {k:'BA',c:'ba'},{k:'DEV',c:'dev'},{k:'UAT',c:'uat'},
+  {k:'Acceptance',c:'accept'},{k:'Golive',c:'glv'}
+];
+function renderPipeline(){
+  const sc={};fInprog.forEach(r=>{sc[r.status]=(sc[r.status]||0)+1;});
+  const tot=fInprog.length||1;
+  let html='';
+  ST_ORDER.forEach((s,i)=>{
+    const n=sc[s.k]||0;
+    html+=`<div class="pstage ${s.c}" onclick="quickSt('${s.k}')">
+      <div class="psname">${s.k}</div>
+      <div class="psnum">${n}</div>
+      <div class="pspct">${Math.round(n/tot*100)}%</div>
+    </div>`;
+    if(i<ST_ORDER.length-1)html+='<div class="pipe-arr">›</div>';
+  });
+  document.getElementById('pipeline').innerHTML=html;
+}
+function quickSt(st){document.getElementById('fstatus').value=st;applyFilters();}
+
+// CHARTS
+function cnt(arr,key){const m={};arr.forEach(r=>{const v=r[key]||'Khác';m[v]=(m[v]||0)+1;});return m;}
+function mkBar(id,labels,data,opts={}){
+  const ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:labels.map((_,i)=>gc(i,.85)),borderRadius:5,borderWidth:0,...(opts.ds||{})}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.formattedValue}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:'#64748b'}},y:{grid:{color:'#f8fafc'},ticks:{font:{size:11},color:'#94a3b8'}}},animation:{duration:700},...(opts.opt||{})}});
+}
+function mkDoughnut(id,labels,data){
+  const ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id])charts[id].destroy();
+  const tot=data.reduce((a,b)=>a+b,0)||1;
+  charts[id]=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:labels.map((_,i)=>gc(i)),borderWidth:2,borderColor:'#fff',hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:8}},tooltip:{callbacks:{label:c=>` ${c.formattedValue} (${Math.round(c.raw/tot*100)}%)`}}},animation:{animateScale:true,duration:800}}});
+}
+function mkLine(id,labels,data,label=''){
+  const ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:data.map((_,i)=>{const max=Math.max(...data);return _===max?'rgba(215,18,73,.85)':'rgba(0,89,147,.8)';}),borderRadius:6,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.formattedValue} deals`}}},scales:{x:{grid:{display:false},ticks:{font:{size:12},color:'#334155',font:{weight:'600'}}},y:{grid:{color:'#f8fafc'},ticks:{font:{size:11},color:'#94a3b8'},beginAtZero:true}},animation:{duration:700}}});
+}
+function mkGrouped(id,labels,datasets){
+  const ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12,padding:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'#f8fafc'},ticks:{font:{size:11}},beginAtZero:true}},animation:{duration:700}}});
+}
+function mkHBar(id,labels,data,colors=null){
+  const ctx=document.getElementById(id);if(!ctx)return;
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors||labels.map((_,i)=>gc(i,.85)),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.formattedValue}`}}},scales:{x:{grid:{color:'#f8fafc'},ticks:{font:{size:11},color:'#94a3b8'}},y:{grid:{display:false},ticks:{font:{size:11},color:'#334155',font:{weight:'600'}}}},animation:{duration:700}}});
+}
+
+function renderCharts(){
+  const TK=fInprog, GL=fGolive;
+  const kvFilter=g('fkv');
+
+  // ── Casa tính từ fGolive (luôn phản ánh đúng filter) ──
+  const casaFiltered=GL.reduce((a,b)=>a+(b.casa||0),0);
+
+  // Timeline (dữ liệu chuẩn, không thay đổi theo filter)
+  const tl=RAW?.timeline||[];
+  const tlLabels=tl.map(t=>{const m=parseInt(t.month.split('-')[1]);return `T${m}/2026`;});
+  const tlData=tl.map(t=>t.count);
+  mkLine('c-timeline',tlLabels,tlData,'Golive deals');
+  setT('b-timeline',`${GL.length} deals — ${casaFiltered.toFixed(1)} tỷ`);
+
+  // Group TK donut
+  const gtk=cnt(TK,'group');mkDoughnut('c-grp-tk',Object.keys(gtk),Object.values(gtk));
+
+  // Group GL donut
+  const ggl=cnt(GL,'group');mkDoughnut('c-grp-gl',Object.keys(ggl),Object.values(ggl));
+
+  // ── Casa by KV: tính động từ fGolive ──
+  const caskv={};
+  GL.forEach(r=>{if(r.kv)caskv[r.kv]=(caskv[r.kv]||0)+(r.casa||0);});
+  const ckL=Object.keys(caskv).sort();
+  const ckD=ckL.map(k=>parseFloat(caskv[k].toFixed(3)));
+  const maxCasa=ckD.length?Math.max(...ckD):0;
+  const ckColors=ckD.map(v=>v===maxCasa&&maxCasa>0?'rgba(215,18,73,.85)':'rgba(0,89,147,.8)');
+  mkHBar('c-casa-kv',ckL,ckD,ckColors);
+  const topKV=ckL[ckD.indexOf(maxCasa)]||'—';
+  setT('b-casa-kv',ckL.length?`Cao nhất: ${topKV} = ${maxCasa.toFixed(1)} tỷ`:'—');
+  setT('b-kv-casa-ttl',`Tổng: ${casaFiltered.toFixed(2)} tỷ`);
+
+  // Service GL horizontal bar
+  const svc=cnt(GL,'service');
+  const svL=Object.keys(svc).sort((a,b)=>svc[b]-svc[a]).filter(k=>k&&k!='Khác');
+  mkHBar('c-svc-gl',svL,svL.map(k=>svc[k]));
+  setT('b-svc-gl',`${GL.length} deals`);
+
+  // Status TK horizontal bar
+  const stk=cnt(TK,'status');
+  const stL=['BA','DEV','UAT','Acceptance','Golive','TKGP Review','TKGP Approval'].filter(k=>stk[k]);
+  const stColors=stL.map(k=>{if(['Acceptance','Golive'].includes(k))return'rgba(215,18,73,.85)';if(k==='DEV')return'rgba(0,89,147,.85)';if(k==='UAT')return'rgba(0,145,212,.8)';if(k==='BA')return'rgba(124,58,237,.8)';return'rgba(245,158,11,.8)';});
+  mkHBar('c-st-tk',stL,stL.map(k=>stk[k]),stColors);
+  setT('b-st-tk',`${TK.length} hồ sơ`);
+
+  // Issue Type comparison grouped bar
+  const itkG={Bizlink:0,ERP:0};TK.forEach(r=>{if(itkG.hasOwnProperty(r.issue_type))itkG[r.issue_type]++;});
+  const iglG={Bizlink:0,ERP:0};GL.forEach(r=>{if(iglG.hasOwnProperty(r.issue_type))iglG[r.issue_type]++;});
+  mkGrouped('c-it-cmp',['Bizlink','ERP'],[
+    {label:'Đang TK',data:[itkG.Bizlink,itkG.ERP],backgroundColor:'rgba(0,89,147,.8)',borderRadius:5,borderWidth:0},
+    {label:'Đã Golive',data:[iglG.Bizlink,iglG.ERP],backgroundColor:'rgba(16,185,129,.8)',borderRadius:5,borderWidth:0},
+  ]);
+
+  // ── KV Plan chart: lọc theo KV filter nếu có ──
+  const kvs=RAW?.kv_stats||{};
+  const kvK=Object.keys(kvs).sort().filter(k=>{
+    if(!k||k==='undefined')return false;
+    if(!kvFilter)return true;
+    return 'KV '+k===kvFilter||k===kvFilter;
+  });
+  if(kvK.length){
+    mkGrouped('c-kv-plan',kvK.map(k=>'KV '+k),[
+      {label:'KH 2026',data:kvK.map(k=>kvs[k].plan),backgroundColor:'rgba(0,45,90,.75)',borderRadius:3,borderWidth:0},
+      {label:'Đã Golive',data:kvK.map(k=>kvs[k].golive),backgroundColor:'rgba(16,185,129,.8)',borderRadius:3,borderWidth:0},
+      {label:'Đang TK',data:kvK.map(k=>kvs[k].in_progress),backgroundColor:'rgba(126,211,247,.85)',borderRadius:3,borderWidth:0},
+    ]);
+    // Casa by KV bar trong tab KV: dùng caskv đã tính từ fGolive
+    const casaKvVals=kvK.map(k=>parseFloat((caskv['KV '+k]||0).toFixed(3)));
+    const maxV=casaKvVals.length?Math.max(...casaKvVals):0;
+    const casaColors=casaKvVals.map(v=>v===maxV&&maxV>0?'rgba(215,18,73,.85)':'rgba(245,158,11,.8)');
+    mkBar('c-kv-casa',kvK.map(k=>'KV '+k),casaKvVals,{ds:{backgroundColor:casaColors,borderRadius:5}});
+    renderKVTable(kvK,kvs,caskv);
+  }
+}
+
+function renderKVTable(kvK,kvs,caskv){
+  const body=document.getElementById('kv-body');if(!body)return;
+  body.innerHTML=kvK.map(k=>{
+    const s=kvs[k],p=s.plan,g=s.golive,ip=s.in_progress,done=g+ip,gap=s.gap;
+    const pct=p?Math.round(g/p*100):0;
+    const barW=p?Math.min(100,Math.round(done/p*100)):0;
+    const bClass=barW>=80?'green':barW>=50?'blue':'gold';
+    const gClass=gap<0?'trend-dn':gap===0?'':'trend-up';
+    const casa=(caskv['KV '+k]||0).toFixed(1);
+    return `<tr>
+      <td><span class="kv-chip">KV ${k}</span></td>
+      <td style="text-align:center;font-weight:700">${p}</td>
+      <td style="text-align:center;font-weight:800;color:var(--green)">${g}</td>
+      <td style="text-align:center;color:${pct>=50?'var(--green)':pct>=30?'var(--gold)':'var(--red)'};font-weight:700">${pct}%</td>
+      <td style="text-align:center;color:var(--blue2)">${ip}</td>
+      <td style="text-align:center;color:var(--g2)">${done}</td>
+      <td style="text-align:center;font-weight:800" class="${gClass}">${gap<0?gap:gap===0?'✅':''+gap}</td>
+      <td style="width:130px">
+        <div class="pbar-wrap h8"><div class="pbar ${bClass}" style="width:${barW}%"></div></div>
+        <div style="font-size:10px;color:var(--g4);margin-top:2px">${barW}% xử lý</div>
+      </td>
+      <td style="text-align:right;font-weight:700;color:var(--gold)">${casa}</td>
+    </tr>`;
+  }).join('');
+}
+
+// TK TABLE
+const SCLS={BA:'s-ba',DEV:'s-dev',UAT:'s-uat',Acceptance:'s-accept',Golive:'s-golive','TKGP Review':'s-tkgp','TKGP Approval':'s-tkgp'};
+let tkDataFull=[];
+function renderTK(){
+  const q=(document.getElementById('stk').value||'').toLowerCase();
+  const sf=document.getElementById('stk-st').value;
+  tkDataFull=fInprog.filter(r=>(!sf||r.status===sf)&&(!q||r.name.toLowerCase().includes(q)||r.key.toLowerCase().includes(q)||(r.branch||'').toLowerCase().includes(q)));
+  tkDataFull.sort((a,b)=>{const v=tkSort.asc?1:-1;return(a[tkSort.col]||'')>(b[tkSort.col]||'')?v:-v;});
+  const start=tkPage*PS,page=tkDataFull.slice(start,start+PS);
+  document.getElementById('tk-body').innerHTML=page.map(r=>{
+    const rc=r.ready_close;
+    const acShort=(r.action||'').replace(/^\d+\.\s*/,'').substring(0,55);
+    return `<tr class="${rc?'rd-cl':''}">
+      <td style="font-size:10.5px;color:var(--g4);white-space:nowrap">${r.key}</td>
+      <td><span class="sbadge ${SCLS[r.status]||'s-ba'}">${r.status}</span></td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${r.name}">${r.name}</td>
+      <td><span class="kv-chip">${r.kv}</span></td>
+      <td style="font-size:11px;color:var(--g3);white-space:nowrap">${(r.branch||'').replace(/^\d+ - /,'')}</td>
+      <td style="font-size:12px">${r.group}</td>
+      <td style="font-size:11px;color:var(--g4)">${r.software||''}</td>
+      <td style="font-size:10.5px;color:${rc?'var(--red)':'var(--g3)'};font-weight:${rc?'700':'400'};max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.action||''}">${rc?'⚡ ':''}${acShort}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--g4)">Không có dữ liệu</td></tr>';
+  setT('tk-count',`${tkDataFull.length} hồ sơ`);
+  const tot=tkDataFull.length;
+  document.getElementById('tk-pg').innerHTML=`Hiển thị ${Math.min(start+1,tot)}–${Math.min(start+PS,tot)} / ${tot}`+(tot>PS?`&nbsp;<a href="#" onclick="tkPage=Math.min(tkPage+1,${Math.ceil(tot/PS)-1});renderTK();return false">→</a>&nbsp;<a href="#" onclick="tkPage=Math.max(0,tkPage-1);renderTK();return false">←</a>`:'');
+}
+function stkSort(col){if(tkSort.col===col)tkSort.asc=!tkSort.asc;else{tkSort.col=col;tkSort.asc=true;}renderTK();}
+
+// GL TABLE
+let glDataFull=[];
+function renderGL(){
+  const q=(document.getElementById('sgl').value||'').toLowerCase();
+  const kf=document.getElementById('sgl-kv').value;
+  glDataFull=fGolive.filter(r=>(!kf||r.kv===kf)&&(!q||(r.name||'').toLowerCase().includes(q)||(r.branch||'').toLowerCase().includes(q)));
+  const start=glPage*PS,page=glDataFull.slice(start,start+PS);
+  document.getElementById('gl-body').innerHTML=page.map(r=>`<tr>
+    <td style="font-size:10.5px;color:var(--g4);white-space:nowrap">${r.key}</td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${r.name}">${r.name}</td>
+    <td><span class="kv-chip">${r.kv}</span></td>
+    <td style="font-size:11px;color:var(--g3)">${(r.branch||'').replace(/^\d+ - /,'')}</td>
+    <td>${r.group||'—'}</td>
+    <td style="color:var(--blue2);font-size:11px">${r.service||'—'}</td>
+    <td><span class="${r.issue_type==='ERP'?'it-erp':'it-biz'}">${r.issue_type}</span></td>
+    <td style="font-size:11px;color:var(--g3)">${r.deploy_date||'—'}</td>
+    <td style="text-align:right;font-weight:700;color:${r.casa>10?'var(--red)':r.casa>1?'var(--green)':r.casa>0?'var(--gold)':'var(--g4)'}">${r.casa?r.casa.toFixed(3):'—'}</td>
+  </tr>`).join('')||'<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--g4)">Không có dữ liệu</td></tr>';
+  const tot=glDataFull.length;
+  document.getElementById('gl-pg').innerHTML=`Hiển thị ${Math.min(start+1,tot)}–${Math.min(start+PS,tot)} / ${tot}`;
+}
+
+// CN TABLE
+let cnDataFull=[];
+function renderCN(){
+  const q=(document.getElementById('scn').value||'').toLowerCase();
+  const kf=document.getElementById('scn-kv').value;
+  const gf=document.getElementById('scn-gap').value;
+  const cn=RAW?.cn||[];
+  cnDataFull=cn.filter(r=>{
+    const kvOk=!kf||'KV '+r.kv===kf||r.kv===kf;
+    const qOk=!q||(r.branch_name||'').toLowerCase().includes(q)||(r.staff||'').toLowerCase().includes(q)||r.branch_code.includes(q);
+    const gOk=!gf||(gf==='neg'&&r.gap<0)||(gf==='zero'&&r.gap===0)||(gf==='pos'&&r.gap>0);
+    return kvOk&&qOk&&gOk;
+  });
+  setT('cn-cnt',`${cnDataFull.length} chi nhánh`);
+  const start=cnPage*PS,page=cnDataFull.slice(start,start+PS);
+  document.getElementById('cn-body').innerHTML=page.map(r=>{
+    const p=r.plan,g=r.golive,ip=r.in_progress,gap=r.gap;
+    const bW=p?Math.min(100,Math.round((g+ip)/p*100)):0;
+    const bC=bW>=80?'green':bW>=40?'blue':'gold';
+    const over=gap<0,exact=gap===0;
+    return `<tr style="${over?'background:rgba(215,18,73,.04)':''}">
+      <td><span class="kv-chip">KV ${r.kv}</span></td>
+      <td style="color:var(--g4);font-size:11px">${r.branch_code}</td>
+      <td><b style="${over?'color:var(--red)':''}">${r.branch_name}</b>${over?'<span style="color:var(--red);font-size:10px;margin-left:4px">🔴 Vượt KH</span>':exact?'<span style="color:var(--green);font-size:10px;margin-left:4px">✅</span>':''}</td>
+      <td style="text-align:center;font-weight:700">${p}</td>
+      <td style="text-align:center;font-weight:800;color:var(--green)">${g}</td>
+      <td style="text-align:center;color:var(--blue2)">${ip}</td>
+      <td style="text-align:center;font-weight:800;color:${over?'var(--red)':exact?'var(--green)':'var(--g2)'}">${over?gap:exact?'0':gap}</td>
+      <td style="min-width:110px">
+        <div class="pbar-wrap h8"><div class="pbar ${bC}" style="width:${bW}%"></div></div>
+        <div style="font-size:10px;color:var(--g4);margin-top:1px">${bW}%</div>
+      </td>
+      <td style="font-size:11px;color:var(--g4)">${r.staff||''}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--g4)">Không có dữ liệu</td></tr>';
+  const tot=cnDataFull.length;
+  document.getElementById('cn-pg').innerHTML=`Hiển thị ${Math.min(start+1,tot)}–${Math.min(start+PS,tot)} / ${tot}`+(tot>PS?`&nbsp;<a href="#" onclick="cnPage=Math.min(cnPage+1,${Math.ceil(tot/PS)-1});renderCN();return false">→</a>&nbsp;<a href="#" onclick="cnPage=Math.max(0,cnPage-1);renderCN();return false">←</a>`:'');
+}
+
+// TABS
+const TABS=['ov','tk','gl','kv','cn'];
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',TABS[i]===name));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='ov'||name==='kv')setTimeout(renderCharts,40);
+  if(name==='tk')renderTK();
+  if(name==='gl'){renderGL();renderGoliveStats();}
+  if(name==='cn')renderCN();
+}
+function renderGoliveStats(){
+  const grpGL={};fGolive.forEach(r=>{grpGL[r.group]=(grpGL[r.group]||0)+1;});
+  const itGL={Bizlink:0,ERP:0};fGolive.forEach(r=>{if(itGL.hasOwnProperty(r.issue_type))itGL[r.issue_type]++;});
+  // ── Casa tính từ fGolive (phản ánh đúng filter đang áp dụng) ──
+  const casa=fGolive.reduce((a,b)=>a+(b.casa||0),0);
+  setT('mg-total',fGolive.length);setT('mg-casa',casa.toFixed(2));
+  setT('mg-bv',grpGL['Bệnh viện']||0);setT('mg-biz',itGL.Bizlink);setT('mg-erp',itGL.ERP);
+}
+
+// INIT
+document.getElementById('badge-date').textContent='📅 '+new Date().toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+loadDefault();
+</script>
+</body>
+</html>

@@ -2193,6 +2193,192 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
 #panel-dashboard ::-webkit-scrollbar-thumb{background:#007DB7}
 
 </style>
+
+<style id="mobile-css">
+/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 998;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  padding: 4px 0 calc(4px + env(safe-area-inset-bottom));
+}
+.mobile-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.mnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 2px;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 52px;
+}
+.mnav-item.active { background: var(--blue-pale); }
+.mnav-item i {
+  font-size: 1.1rem;
+  color: var(--gray);
+  transition: color 0.2s, transform 0.2s;
+}
+.mnav-item span {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--gray);
+  letter-spacing: 0.2px;
+  text-align: center;
+  line-height: 1.2;
+}
+.mnav-item.active i { color: var(--blue-dark); transform: scale(1.1); }
+.mnav-item.active span { color: var(--blue-dark); }
+
+/* Hamburger button (sidebar toggle) */
+.hamburger-btn {
+  display: none;
+  background: none; border: none;
+  cursor: pointer; padding: 8px;
+  color: var(--blue-dark); font-size: 1.1rem;
+}
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1100;
+}
+.sidebar-overlay.show { display: block; }
+.sidebar.mobile-open {
+  display: flex !important;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 1200;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+  animation: slideInLeft 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── DASHBOARD MOBILE CSS ────────────────────────────────────────── */
+@media (max-width: 900px) {
+  /* Show mobile nav, hide main sidebar */
+  .mobile-nav { display: block; }
+  .hamburger-btn { display: block; }
+
+  /* Pad content above mobile nav */
+  .content-panel { padding-bottom: 72px; }
+
+  /* Chat fab & back-to-top: adjust for bottom nav */
+  .chat-fab { bottom: 80px !important; }
+  .back-top { bottom: 150px !important; }
+}
+
+@media (max-width: 900px) {
+  /* Dashboard header */
+  #panel-dashboard .hdr-inner {
+    flex-wrap: wrap; gap: 8px; padding: 12px 16px;
+  }
+  #panel-dashboard .hdr-right { flex-wrap: wrap; gap: 6px; }
+  #panel-dashboard .hdr-text h1 { font-size: 14px; }
+  #panel-dashboard .hdr-text p  { font-size: 10px; }
+
+  /* Import bar: stack */
+  #panel-dashboard .import-bar {
+    flex-direction: column; align-items: flex-start; padding: 8px 16px;
+  }
+
+  /* Filters: scroll horizontal */
+  #panel-dashboard .fbar {
+    overflow-x: auto; flex-wrap: nowrap;
+    padding: 8px 12px; gap: 8px;
+  }
+  #panel-dashboard .fg { flex-shrink: 0; }
+  #panel-dashboard .fg select { min-width: 100px; font-size: 11px; }
+
+  /* Strip */
+  #panel-dashboard .strip { padding: 4px 12px; font-size: 10px; }
+
+  /* KPI grid: 2 cols on mobile */
+  #panel-dashboard .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+  }
+  #panel-dashboard .kcard { padding: 12px 12px 10px; }
+  #panel-dashboard .kcard-val { font-size: 22px; }
+
+  /* Main padding */
+  #panel-dashboard .main { padding: 12px 12px; }
+
+  /* Pipeline: horizontal scroll */
+  #panel-dashboard .pipe-wrap { overflow-x: auto; }
+  #panel-dashboard .pipe-stages { min-width: 600px; flex-wrap: nowrap; }
+  #panel-dashboard .pipe-arr { display: flex !important; }
+
+  /* Tabs: scroll horizontal */
+  #panel-dashboard .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  #panel-dashboard .tab { padding: 8px 12px; font-size: 12px; flex-shrink: 0; }
+
+  /* Charts: single column */
+  #panel-dashboard .crows.c2,
+  #panel-dashboard .crows.c3,
+  #panel-dashboard .crows.c13,
+  #panel-dashboard .crows.c4 {
+    grid-template-columns: 1fr !important;
+  }
+  #panel-dashboard .cc { padding: 14px; }
+  #panel-dashboard .cw.h280 { height: 200px; }
+  #panel-dashboard .cw.h240 { height: 180px; }
+  #panel-dashboard .cw.h200 { height: 160px; }
+  #panel-dashboard .cw.h160 { height: 140px; }
+
+  /* Tables: horizontal scroll */
+  #panel-dashboard .twrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #panel-dashboard .tc { padding: 12px; overflow-x: auto; }
+  #panel-dashboard table { min-width: 600px; }
+  #panel-dashboard .kv-table { min-width: 500px; }
+
+  /* KPI pipeline stat chips */
+  #panel-dashboard .stat-chips { flex-wrap: wrap; gap: 6px; }
+
+  /* Alert */
+  #panel-dashboard .alert { padding: 10px 14px; }
+  #panel-dashboard .alert-chips { flex-wrap: wrap; gap: 4px; }
+
+  /* Drop box */
+  #panel-dashboard .drop-box { padding: 6px 12px; font-size: 11px; }
+
+  /* GL/TK mini stats */
+  #panel-dashboard .crows.c3.mg { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 480px) {
+  #panel-dashboard .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  #panel-dashboard .kcard-val { font-size: 20px; }
+  #panel-dashboard .logo-wrap { gap: 8px; }
+  #panel-dashboard .logo { font-size: 11px; padding: 5px 10px; }
+}
+</style>
+
 </head>
 <body>
 
@@ -2235,6 +2421,8 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
       </div>
     </div>
     <div class="nav-right">
+      <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    
       <button class="btn-admin" id="adminBtn" onclick="openAdminModal()">
         <i class="fas fa-lock"></i> Admin
       </button>
@@ -4945,7 +5133,7 @@ tbody td{padding:9px 12px;color:var(--g1);vertical-align:middle}
 
     <!-- PANEL: DASHBOARD -->
     <div class="panel" id="panel-dashboard">
-      <div style="overflow-x:auto;min-width:0">
+      <div style="overflow-x:hidden;width:100%;min-width:0">
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-deco"><div class="hdr-circle c1"></div><div class="hdr-circle c2"></div><div class="hdr-circle c3"></div></div>
@@ -6388,5 +6576,86 @@ document.getElementById('badge-date').textContent='📅 '+new Date().toLocaleDat
 loadDefault();
 
 </script>
+
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-inner">
+    <div class="mnav-item active" id="mnav-home" onclick="showPanel('home')">
+      <i class="fas fa-house"></i><span>Trang chủ</span>
+    </div>
+    <div class="mnav-item" id="mnav-solution" onclick="showPanel('solution')">
+      <i class="fas fa-rocket"></i><span>Giải pháp</span>
+    </div>
+    <div class="mnav-item" id="mnav-customers" onclick="showPanel('customers')">
+      <i class="fas fa-users"></i><span>Khách hàng</span>
+    </div>
+    <div class="mnav-item" id="mnav-docs" onclick="showPanel('docs')">
+      <i class="fas fa-folder-open"></i><span>Tài liệu</span>
+    </div>
+    <div class="mnav-item" id="mnav-dashboard" onclick="showPanel('dashboard')">
+      <i class="fas fa-chart-line"></i><span>Dashboard</span>
+    </div>
+    <div class="mnav-item" id="mnav-more" onclick="toggleMobileMenu()">
+      <i class="fas fa-bars"></i><span>Thêm</span>
+    </div>
+  </div>
+</nav>
+
+
+<script id="mobile-nav-js">
+// ── MOBILE MENU FUNCTIONS ──────────────────────────────────────
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar.classList.contains('mobile-open')) {
+    closeMobileSidebar();
+  } else {
+    sidebar.classList.add('mobile-open');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeMobileSidebar() {
+  document.querySelector('.sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ── Sync mobile bottom nav với showPanel ──────────────────────
+const _origShowPanel = window.showPanel;
+window.showPanel = function(id) {
+  // Gọi hàm gốc
+  if (typeof _origShowPanel === 'function') _origShowPanel(id);
+
+  // Cập nhật mobile nav active state
+  document.querySelectorAll('.mnav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  const mnavEl = document.getElementById('mnav-' + id);
+  if (mnavEl) {
+    mnavEl.classList.add('active');
+  } else {
+    // Panels không có trong bottom nav (contact, faq) → đánh dấu "more"
+    const moreEl = document.getElementById('mnav-more');
+    if (moreEl) moreEl.classList.add('active');
+  }
+
+  // Đóng mobile sidebar sau khi chọn
+  closeMobileSidebar();
+
+  // Scroll lên đầu panel trên mobile
+  const cp = document.querySelector('.content-panel');
+  if (cp) cp.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ── Resize: đóng sidebar nếu màn hình rộng ──────────────────────
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 900) closeMobileSidebar();
+});
+</script>
+
 </body>
 </html>
